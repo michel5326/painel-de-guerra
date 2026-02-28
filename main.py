@@ -2,24 +2,44 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from db import engine, Base
 
+# IMPORTANTE: garantir que todos os models sejam carregados
+from core import models as core_models
+from prospecting import models as prospect_models
+
 from core.routes import router as core_router
 from prospecting.routes import router as prospect_router
-from prospecting import models as prospect_models  # garante registro dos models
 
-app = FastAPI()
+app = FastAPI(
+    title="Máquina de Guerra API",
+    version="1.0.0"
+)
 
-# 🔥 CORS CONFIG (resolve erro 405 OPTIONS)
+# =========================
+# CORS CONFIG
+# =========================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # pode restringir depois
+    allow_origins=["*"],  # depois podemos restringir ao domínio do front
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# cria tabelas
+# =========================
+# DATABASE INIT
+# =========================
 Base.metadata.create_all(bind=engine)
 
-# registra rotas
+# =========================
+# ROUTERS
+# =========================
 app.include_router(core_router)
 app.include_router(prospect_router)
+
+
+# =========================
+# HEALTH CHECK
+# =========================
+@app.get("/")
+def root():
+    return {"status": "Máquina de Guerra online"}

@@ -19,7 +19,11 @@ class Product(Base):
     min_roas = Column(Float, nullable=False)
     status = Column(String, default="active")
 
-    campaigns = relationship("Campaign", back_populates="product")
+    campaigns = relationship(
+        "Campaign",
+        back_populates="product",
+        cascade="all, delete-orphan"
+    )
 
 
 class Campaign(Base):
@@ -30,10 +34,18 @@ class Campaign(Base):
     daily_budget = Column(Float, nullable=False)
     status = Column(String, default="active")
 
-    product_id = Column(Integer, ForeignKey("products.id"))
+    product_id = Column(
+        Integer,
+        ForeignKey("products.id", ondelete="CASCADE")
+    )
+
     product = relationship("Product", back_populates="campaigns")
 
-    keywords = relationship("Keyword", back_populates="campaign")
+    keywords = relationship(
+        "Keyword",
+        back_populates="campaign",
+        cascade="all, delete-orphan"
+    )
 
 
 class Keyword(Base):
@@ -45,8 +57,18 @@ class Keyword(Base):
     intent = Column(String, nullable=False)
     status = Column(String, default="active")
 
-    campaign_id = Column(Integer, ForeignKey("campaigns.id"))
+    campaign_id = Column(
+        Integer,
+        ForeignKey("campaigns.id", ondelete="CASCADE")
+    )
+
     campaign = relationship("Campaign", back_populates="keywords")
+
+    logs = relationship(
+        "DailyLog",
+        back_populates="keyword",
+        cascade="all, delete-orphan"
+    )
 
 
 class DailyLog(Base):
@@ -60,5 +82,9 @@ class DailyLog(Base):
     conversions = Column(Integer, nullable=False)
     revenue = Column(Float, nullable=False)
 
-    keyword_id = Column(Integer, ForeignKey("keywords.id"))
-    keyword = relationship("Keyword")
+    keyword_id = Column(
+        Integer,
+        ForeignKey("keywords.id", ondelete="CASCADE")
+    )
+
+    keyword = relationship("Keyword", back_populates="logs")
