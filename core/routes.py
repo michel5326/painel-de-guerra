@@ -146,16 +146,34 @@ def product_dashboard(product_id: int, db: Session = Depends(get_db)):
             if not logs:
                 continue
 
-            cost = sum(log.cost for log in logs)
-            revenue = sum(log.revenue for log in logs)
-            conversions = sum(log.conversions for log in logs)
+            # ordenar por data
+            logs_sorted = sorted(logs, key=lambda x: x.date)
+
+            cost = sum(log.cost for log in logs_sorted)
+            revenue = sum(log.revenue for log in logs_sorted)
+            conversions = sum(log.conversions for log in logs_sorted)
 
             total_cost += cost
             total_revenue += revenue
             total_conversions += conversions
 
+            # ROAS total
             roas = revenue / cost if cost > 0 else 0
 
+            # tendência baseada nos últimos 3 dias
+            roas_series = [
+                (log.revenue / log.cost) if log.cost > 0 else 0
+                for log in logs_sorted
+            ]
+
+            trend = "→"
+            if len(roas_series) >= 3:
+                if roas_series[-1] > roas_series[-2] > roas_series[-3]:
+                    trend = "↑"
+                elif roas_series[-1] < roas_series[-2] < roas_series[-3]:
+                    trend = "↓"
+
+            # status
             if roas >= product.min_roas:
                 status = "🟢"
             else:
@@ -164,6 +182,7 @@ def product_dashboard(product_id: int, db: Session = Depends(get_db)):
             all_keywords.append({
                 "keyword": keyword.keyword,
                 "roas": round(roas, 2),
+                "trend": trend,
                 "conversions": conversions,
                 "cost": round(cost, 2),
                 "revenue": round(revenue, 2),
