@@ -13,6 +13,10 @@ class Prospect(Base):
 
     main_intent = Column(String, nullable=False)
 
+    avg_ticket = Column(Float, nullable=False)
+    commission_percent = Column(Float, nullable=False)
+    estimated_cpa = Column(Float, nullable=False)
+
     structure_observed = Column(Text, nullable=True)
     angles_identified = Column(Text, nullable=True)
 
