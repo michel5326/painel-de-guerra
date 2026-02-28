@@ -94,3 +94,19 @@ def create_keyword(keyword: dict, db: Session = Depends(get_db)):
 @app.get("/keywords")
 def list_keywords(db: Session = Depends(get_db)):
     return db.query(models.Keyword).all()
+
+    from sqlalchemy import Date
+
+class DailyLog(Base):
+    __tablename__ = "daily_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    date = Column(Date, nullable=False)
+    impressions = Column(Integer, nullable=False)
+    clicks = Column(Integer, nullable=False)
+    cost = Column(Float, nullable=False)
+    conversions = Column(Integer, nullable=False)
+    revenue = Column(Float, nullable=False)
+
+    keyword_id = Column(Integer, ForeignKey("keywords.id"))
+    keyword = relationship("Keyword")

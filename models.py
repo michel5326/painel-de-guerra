@@ -43,3 +43,31 @@ class Keyword(Base):
 
     campaign_id = Column(Integer, ForeignKey("campaigns.id"))
     campaign = relationship("Campaign", back_populates="keywords")
+
+    from datetime import date
+
+# ======================
+# DAILY LOGS
+# ======================
+
+@app.post("/logs")
+def create_log(log: dict, db: Session = Depends(get_db)):
+    new_log = models.DailyLog(
+        date=date.fromisoformat(log["date"]),
+        impressions=log["impressions"],
+        clicks=log["clicks"],
+        cost=log["cost"],
+        conversions=log["conversions"],
+        revenue=log["revenue"],
+        keyword_id=log["keyword_id"]
+    )
+    db.add(new_log)
+    db.commit()
+    db.refresh(new_log)
+
+    return {"id": new_log.id}
+
+
+@app.get("/logs")
+def list_logs(db: Session = Depends(get_db)):
+    return db.query(models.DailyLog).all()
