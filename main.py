@@ -3,6 +3,7 @@ from db import engine, Base
 
 from core.routes import router as core_router
 from prospecting.routes import router as prospect_router
+from prospecting import models as prospect_models  # IMPORTANTE
 
 app = FastAPI()
 
