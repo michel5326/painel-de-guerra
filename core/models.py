@@ -76,11 +76,19 @@ class DailyLog(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     date = Column(Date, nullable=False)
+
     impressions = Column(Integer, nullable=False)
     clicks = Column(Integer, nullable=False)
     cost = Column(Float, nullable=False)
+
     conversions = Column(Integer, nullable=False)
     revenue = Column(Float, nullable=False)
+
+    # 🔥 FUNIL EXPANDIDO
+    visitors = Column(Integer, default=0)
+    checkouts = Column(Integer, default=0)
+    upsells = Column(Integer, default=0)
+    bounce_rate = Column(Float, nullable=True)
 
     keyword_id = Column(
         Integer,

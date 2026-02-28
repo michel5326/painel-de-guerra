@@ -8,6 +8,9 @@ from prospecting import models as prospect_models
 
 from core.routes import router as core_router
 from prospecting.routes import router as prospect_router
+from funnel.routes import router as funnel_router
+from benchmarks.routes import router as benchmarks_router
+from benchmarks.routes import router as benchmarks_router
 
 app = FastAPI(
     title="Máquina de Guerra API",
@@ -19,7 +22,7 @@ app = FastAPI(
 # =========================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # depois podemos restringir ao domínio do front
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -35,7 +38,9 @@ Base.metadata.create_all(bind=engine)
 # =========================
 app.include_router(core_router)
 app.include_router(prospect_router)
-
+app.include_router(funnel_router)
+app.include_router(benchmarks_router)
+app.include_router(benchmarks_router)
 
 # =========================
 # HEALTH CHECK

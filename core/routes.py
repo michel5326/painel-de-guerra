@@ -8,9 +8,6 @@ from core.kpi_engine import calculate_kpis
 
 router = APIRouter()
 
-# ======================
-# DATABASE SESSION
-# ======================
 
 def get_db():
     db = SessionLocal()
@@ -19,10 +16,6 @@ def get_db():
     finally:
         db.close()
 
-
-# ======================
-# ROOT
-# ======================
 
 @router.get("/")
 def root():
@@ -134,11 +127,20 @@ def delete_keyword(keyword_id: int, db: Session = Depends(get_db)):
 
 @router.post("/logs")
 def create_log(log: dict, db: Session = Depends(get_db)):
+
     log["date"] = date.fromisoformat(log["date"])
+
+    log.setdefault("visitors", 0)
+    log.setdefault("checkouts", 0)
+    log.setdefault("upsells", 0)
+    log.setdefault("bounce_rate", None)
+
     new_log = models.DailyLog(**log)
+
     db.add(new_log)
     db.commit()
     db.refresh(new_log)
+
     return new_log
 
 
@@ -168,6 +170,7 @@ def delete_log(log_id: int, db: Session = Depends(get_db)):
 
 @router.get("/keywords/{keyword_id}/kpis")
 def get_keyword_kpis(keyword_id: int, db: Session = Depends(get_db)):
+
     logs = db.query(models.DailyLog).filter(
         models.DailyLog.keyword_id == keyword_id
     ).all()
@@ -182,84 +185,3 @@ def get_keyword_kpis(keyword_id: int, db: Session = Depends(get_db)):
     product = keyword.campaign.product
 
     return calculate_kpis(logs, product)
-
-
-# ======================
-# PRODUCT DASHBOARD
-# ======================
-
-@router.get("/products/{product_id}/dashboard")
-def product_dashboard(product_id: int, db: Session = Depends(get_db)):
-
-    product = db.query(models.Product).filter(
-        models.Product.id == product_id
-    ).first()
-
-    if not product:
-        return {"message": "Product not found"}
-
-    all_keywords = []
-    total_cost = 0
-    total_revenue = 0
-    total_conversions = 0
-
-    for campaign in product.campaigns or []:
-        for keyword in campaign.keywords or []:
-
-            logs = db.query(models.DailyLog).filter(
-                models.DailyLog.keyword_id == keyword.id
-            ).all()
-
-            if not logs:
-                continue
-
-            logs_sorted = sorted(logs, key=lambda x: x.date)
-
-            cost = sum(log.cost for log in logs_sorted)
-            revenue = sum(log.revenue for log in logs_sorted)
-            conversions = sum(log.conversions for log in logs_sorted)
-
-            total_cost += cost
-            total_revenue += revenue
-            total_conversions += conversions
-
-            roas = revenue / cost if cost > 0 else 0
-
-            roas_series = [
-                (log.revenue / log.cost) if log.cost > 0 else 0
-                for log in logs_sorted
-            ]
-
-            trend = "→"
-            if len(roas_series) >= 3:
-                if roas_series[-1] > roas_series[-2] > roas_series[-3]:
-                    trend = "↑"
-                elif roas_series[-1] < roas_series[-2] < roas_series[-3]:
-                    trend = "↓"
-
-            status = "🟢" if roas >= product.min_roas else "🟡"
-
-            all_keywords.append({
-                "keyword": keyword.keyword,
-                "roas": round(roas, 2),
-                "trend": trend,
-                "conversions": conversions,
-                "cost": round(cost, 2),
-                "revenue": round(revenue, 2),
-                "status": status
-            })
-
-    roas_total = total_revenue / total_cost if total_cost > 0 else 0
-    cpa_medio = total_cost / total_conversions if total_conversions > 0 else 0
-
-    product_status = "🟢 Saudável" if roas_total >= product.min_roas else "🟡 Sob pressão"
-
-    return {
-        "product": product.name,
-        "receita_total": round(total_revenue, 2),
-        "custo_total": round(total_cost, 2),
-        "roas_medio": round(roas_total, 2),
-        "cpa_medio": round(cpa_medio, 2),
-        "status_geral": product_status,
-        "keywords": all_keywords
-    }
