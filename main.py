@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from db import engine, Base
 
 # IMPORTANTE: garantir que todos os models sejam carregados
+from core.migration import run_migration
 from core import models as core_models
 from prospecting import models as prospect_models
 
@@ -31,6 +32,7 @@ app.add_middleware(
 # =========================
 # DATABASE INIT
 # =========================
+run_migration()
 Base.metadata.create_all(bind=engine)
 
 # =========================
