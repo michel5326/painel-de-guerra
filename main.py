@@ -154,8 +154,14 @@ def get_keyword_kpis(keyword_id: int, db: Session = Depends(get_db)):
 
     ctr = clicks / impressions if impressions > 0 else 0
     cpc = cost / clicks if clicks > 0 else 0
+    cvr = conversions / clicks if clicks > 0 else 0
     cpa = cost / conversions if conversions > 0 else 0
     roas = revenue / cost if cost > 0 else 0
+
+    # ECONOMIA AVANÇADA
+    break_even_cpc = product.max_cpa * cvr if cvr > 0 else 0
+    margem_real = revenue - cost
+    conversoes_minimas = cost / product.max_cpa if product.max_cpa > 0 else 0
 
     # CLASSIFICAÇÃO
     if conversions == 0 and cost > product.max_cpa:
@@ -175,7 +181,11 @@ def get_keyword_kpis(keyword_id: int, db: Session = Depends(get_db)):
         "revenue": revenue,
         "CTR": round(ctr, 4),
         "CPC": round(cpc, 2),
+        "CVR": round(cvr, 4),
         "CPA": round(cpa, 2),
         "ROAS": round(roas, 2),
+        "break_even_CPC": round(break_even_cpc, 2),
+        "margem_real": round(margem_real, 2),
+        "conversoes_minimas_para_empate": round(conversoes_minimas, 2),
         "status": status
     }
