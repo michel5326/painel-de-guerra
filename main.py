@@ -5,8 +5,10 @@ import models
 
 app = FastAPI()
 
+# cria tabelas
 Base.metadata.create_all(bind=engine)
 
+# sessão do banco
 def get_db():
     db = SessionLocal()
     try:
@@ -18,6 +20,7 @@ def get_db():
 def root():
     return {"status": "AFF-OS online"}
 
+# criar produto
 @app.post("/products")
 def create_product(product: dict, db: Session = Depends(get_db)):
     new_product = models.Product(
@@ -34,3 +37,9 @@ def create_product(product: dict, db: Session = Depends(get_db)):
     db.refresh(new_product)
 
     return {"id": new_product.id, "name": new_product.name}
+
+# listar produtos
+@app.get("/products")
+def list_products(db: Session = Depends(get_db)):
+    products = db.query(models.Product).all()
+    return products
