@@ -28,8 +28,11 @@ class Campaign(Base):
 
     product_id = Column(Integer, ForeignKey("products.id"))
     product = relationship("Product", back_populates="campaigns")
-    
-    class Keyword(Base):
+
+    keywords = relationship("Keyword", back_populates="campaign")
+
+
+class Keyword(Base):
     __tablename__ = "keywords"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -39,4 +42,4 @@ class Campaign(Base):
     status = Column(String, default="active")
 
     campaign_id = Column(Integer, ForeignKey("campaigns.id"))
-    campaign = relationship("Campaign")
+    campaign = relationship("Campaign", back_populates="keywords")
