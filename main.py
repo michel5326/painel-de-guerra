@@ -20,7 +20,11 @@ def get_db():
 def root():
     return {"status": "AFF-OS online"}
 
-# criar produto
+
+# ======================
+# PRODUCTS
+# ======================
+
 @app.post("/products")
 def create_product(product: dict, db: Session = Depends(get_db)):
     new_product = models.Product(
@@ -38,8 +42,31 @@ def create_product(product: dict, db: Session = Depends(get_db)):
 
     return {"id": new_product.id, "name": new_product.name}
 
-# listar produtos
+
 @app.get("/products")
 def list_products(db: Session = Depends(get_db)):
-    products = db.query(models.Product).all()
-    return products
+    return db.query(models.Product).all()
+
+
+# ======================
+# CAMPAIGNS
+# ======================
+
+@app.post("/campaigns")
+def create_campaign(campaign: dict, db: Session = Depends(get_db)):
+    new_campaign = models.Campaign(
+        name=campaign["name"],
+        daily_budget=campaign["daily_budget"],
+        status=campaign.get("status", "active"),
+        product_id=campaign["product_id"]
+    )
+    db.add(new_campaign)
+    db.commit()
+    db.refresh(new_campaign)
+
+    return {"id": new_campaign.id, "name": new_campaign.name}
+
+
+@app.get("/campaigns")
+def list_campaigns(db: Session = Depends(get_db)):
+    return db.query(models.Campaign).all()
