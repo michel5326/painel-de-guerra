@@ -125,3 +125,39 @@ def create_log(log: dict, db: Session = Depends(get_db)):
 @app.get("/logs")
 def list_logs(db: Session = Depends(get_db)):
     return db.query(models.DailyLog).all()
+
+    # ======================
+# KPI ENGINE
+# ======================
+
+@app.get("/keywords/{keyword_id}/kpis")
+def get_keyword_kpis(keyword_id: int, db: Session = Depends(get_db)):
+    logs = db.query(models.DailyLog).filter(
+        models.DailyLog.keyword_id == keyword_id
+    ).all()
+
+    if not logs:
+        return {"message": "No data"}
+
+    impressions = sum(log.impressions for log in logs)
+    clicks = sum(log.clicks for log in logs)
+    cost = sum(log.cost for log in logs)
+    conversions = sum(log.conversions for log in logs)
+    revenue = sum(log.revenue for log in logs)
+
+    ctr = clicks / impressions if impressions > 0 else 0
+    cpc = cost / clicks if clicks > 0 else 0
+    cpa = cost / conversions if conversions > 0 else 0
+    roas = revenue / cost if cost > 0 else 0
+
+    return {
+        "impressions": impressions,
+        "clicks": clicks,
+        "cost": cost,
+        "conversions": conversions,
+        "revenue": revenue,
+        "CTR": round(ctr, 4),
+        "CPC": round(cpc, 2),
+        "CPA": round(cpa, 2),
+        "ROAS": round(roas, 2)
+    }
