@@ -1,3 +1,4 @@
+from prospecting import models as prospect_models
 from fastapi import FastAPI
 from db import engine, Base
 from core.routes import router
