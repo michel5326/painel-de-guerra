@@ -139,6 +139,13 @@ def get_keyword_kpis(keyword_id: int, db: Session = Depends(get_db)):
     if not logs:
         return {"message": "No data"}
 
+    keyword = db.query(models.Keyword).filter(
+        models.Keyword.id == keyword_id
+    ).first()
+
+    campaign = keyword.campaign
+    product = campaign.product
+
     impressions = sum(log.impressions for log in logs)
     clicks = sum(log.clicks for log in logs)
     cost = sum(log.cost for log in logs)
@@ -150,6 +157,16 @@ def get_keyword_kpis(keyword_id: int, db: Session = Depends(get_db)):
     cpa = cost / conversions if conversions > 0 else 0
     roas = revenue / cost if cost > 0 else 0
 
+    # CLASSIFICAÇÃO
+    if conversions == 0 and cost > product.max_cpa:
+        status = "🔴 Inviável"
+    elif roas >= product.min_roas:
+        status = "🟢 Saudável"
+    elif roas < product.min_roas:
+        status = "🟡 Sob pressão"
+    else:
+        status = "⚪ Dados insuficientes"
+
     return {
         "impressions": impressions,
         "clicks": clicks,
@@ -159,5 +176,6 @@ def get_keyword_kpis(keyword_id: int, db: Session = Depends(get_db)):
         "CTR": round(ctr, 4),
         "CPC": round(cpc, 2),
         "CPA": round(cpa, 2),
-        "ROAS": round(roas, 2)
+        "ROAS": round(roas, 2),
+        "status": status
     }
