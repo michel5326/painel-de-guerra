@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
+from datetime import date
+
 from db import engine, Base, SessionLocal
 import models
 
@@ -15,6 +17,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 
 @app.get("/")
 def root():
@@ -71,7 +74,8 @@ def create_campaign(campaign: dict, db: Session = Depends(get_db)):
 def list_campaigns(db: Session = Depends(get_db)):
     return db.query(models.Campaign).all()
 
-    # ======================
+
+# ======================
 # KEYWORDS
 # ======================
 
@@ -95,18 +99,29 @@ def create_keyword(keyword: dict, db: Session = Depends(get_db)):
 def list_keywords(db: Session = Depends(get_db)):
     return db.query(models.Keyword).all()
 
-    from sqlalchemy import Date
 
-class DailyLog(Base):
-    __tablename__ = "daily_logs"
+# ======================
+# DAILY LOGS
+# ======================
 
-    id = Column(Integer, primary_key=True, index=True)
-    date = Column(Date, nullable=False)
-    impressions = Column(Integer, nullable=False)
-    clicks = Column(Integer, nullable=False)
-    cost = Column(Float, nullable=False)
-    conversions = Column(Integer, nullable=False)
-    revenue = Column(Float, nullable=False)
+@app.post("/logs")
+def create_log(log: dict, db: Session = Depends(get_db)):
+    new_log = models.DailyLog(
+        date=date.fromisoformat(log["date"]),
+        impressions=log["impressions"],
+        clicks=log["clicks"],
+        cost=log["cost"],
+        conversions=log["conversions"],
+        revenue=log["revenue"],
+        keyword_id=log["keyword_id"]
+    )
+    db.add(new_log)
+    db.commit()
+    db.refresh(new_log)
 
-    keyword_id = Column(Integer, ForeignKey("keywords.id"))
-    keyword = relationship("Keyword")
+    return {"id": new_log.id}
+
+
+@app.get("/logs")
+def list_logs(db: Session = Depends(get_db)):
+    return db.query(models.DailyLog).all()
