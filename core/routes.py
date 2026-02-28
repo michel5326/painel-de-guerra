@@ -26,34 +26,75 @@ def root():
 # PRODUCTS
 # ======================
 
-@router.post("/products")
-def create_product(product: dict, db: Session = Depends(get_db)):
-    new_product = models.Product(**product)
-    db.add(new_product)
-    db.commit()
-    db.refresh(new_product)
-    return new_product
+@router.get("/products/{product_id}/dashboard")
+def product_dashboard(product_id: int, db: Session = Depends(get_db)):
 
-
-@router.get("/products")
-def list_products(db: Session = Depends(get_db)):
-    return db.query(models.Product).all()
-
-
-@router.delete("/products/{product_id}")
-def delete_product(product_id: int, db: Session = Depends(get_db)):
     product = db.query(models.Product).filter(
         models.Product.id == product_id
     ).first()
 
     if not product:
-        return {"error": "Product not found"}
+        return {"message": "Product not found"}
 
-    db.delete(product)
-    db.commit()
+    total_impressions = 0
+    total_clicks = 0
+    total_cost = 0
+    total_conversions = 0
+    total_revenue = 0
 
-    return {"message": "Product deleted successfully"}
+    for campaign in product.campaigns or []:
+        for keyword in campaign.keywords or []:
 
+            logs = db.query(models.DailyLog).filter(
+                models.DailyLog.keyword_id == keyword.id
+            ).all()
+
+            for log in logs:
+                total_impressions += log.impressions
+                total_clicks += log.clicks
+                total_cost += log.cost
+                total_conversions += log.conversions
+                total_revenue += log.revenue
+
+    ctr = total_clicks / total_impressions if total_impressions > 0 else 0
+    cpc = total_cost / total_clicks if total_clicks > 0 else 0
+    cvr_real = total_conversions / total_clicks if total_clicks > 0 else 0
+
+    # Conversão base
+    if total_conversions >= 5:
+        conversion_base = cvr_real
+    else:
+        conversion_base = product.estimated_conversion_rate or 0
+
+    commission = product.commission_value or 0
+
+    healthy_cpc = commission * conversion_base
+    max_cpc = healthy_cpc * 1.3
+
+    if cpc > max_cpc:
+        status = "🔴 CPC Acima do Viável"
+    elif cpc > healthy_cpc:
+        status = "🟡 Zona de Atenção"
+    else:
+        status = "🟢 Operando Saudável"
+
+    return {
+        "product": product.name,
+        "impressions": total_impressions,
+        "clicks": total_clicks,
+        "cost": round(total_cost, 2),
+        "revenue": round(total_revenue, 2),
+
+        "CTR": round(ctr, 4),
+        "CPC_medio": round(cpc, 2),
+        "CVR_real": round(cvr_real, 4),
+
+        "conversion_base_usada": round(conversion_base, 4),
+        "healthy_CPC": round(healthy_cpc, 2),
+        "max_CPC": round(max_cpc, 2),
+
+        "status_operacional": status
+    }
 
 # ======================
 # CAMPAIGNS
@@ -125,44 +166,33 @@ def delete_keyword(keyword_id: int, db: Session = Depends(get_db)):
 # LOGS
 # ======================
 
-@router.post("/logs")
-def create_log(log: dict, db: Session = Depends(get_db)):
-
-    log["date"] = date.fromisoformat(log["date"])
-
-    log.setdefault("visitors", 0)
-    log.setdefault("checkouts", 0)
-    log.setdefault("upsells", 0)
-    log.setdefault("bounce_rate", None)
-
-    new_log = models.DailyLog(**log)
-
-    db.add(new_log)
-    db.commit()
-    db.refresh(new_log)
-
-    return new_log
-
-
 @router.get("/logs")
 def list_logs(db: Session = Depends(get_db)):
-    return db.query(models.DailyLog).all()
 
+    logs = db.query(models.DailyLog).all()
 
-@router.delete("/logs/{log_id}")
-def delete_log(log_id: int, db: Session = Depends(get_db)):
-    log = db.query(models.DailyLog).filter(
-        models.DailyLog.id == log_id
-    ).first()
+    result = []
 
-    if not log:
-        return {"error": "Log not found"}
+    for log in logs:
 
-    db.delete(log)
-    db.commit()
+        cpc = log.cost / log.clicks if log.clicks > 0 else 0
 
-    return {"message": "Log deleted successfully"}
+        result.append({
+            "id": log.id,
+            "date": log.date,
+            "keyword_id": log.keyword_id,
+            "impressions": log.impressions,
+            "clicks": log.clicks,
+            "cost": log.cost,
+            "CPC": round(cpc, 2),
+            "visitors": log.visitors,
+            "checkouts": log.checkouts,
+            "conversions": log.conversions,
+            "revenue": log.revenue,
+            "upsells": log.upsells
+        })
 
+    return result
 
 # ======================
 # KPI ENGINE

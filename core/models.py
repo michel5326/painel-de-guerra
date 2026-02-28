@@ -11,12 +11,13 @@ class Product(Base):
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True)
+
     name = Column(String, nullable=False)
-    avg_ticket = Column(Float, nullable=False)
-    commission = Column(Float, nullable=False)
-    margin = Column(Float, nullable=False)
-    max_cpa = Column(Float, nullable=False)
-    min_roas = Column(Float, nullable=False)
+
+    # 🔥 NOVO MODELO
+    commission_value = Column(Float, nullable=False)
+    estimated_conversion_rate = Column(Float, nullable=False)  # ex: 0.02 para 2%
+
     status = Column(String, default="active")
 
     campaigns = relationship(

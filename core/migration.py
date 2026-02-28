@@ -26,3 +26,17 @@ def run_migration():
         """))
 
         conn.commit()
+
+                # =========================
+        # PRODUCT UPDATE
+        # =========================
+
+        conn.execute(text("""
+        ALTER TABLE products
+        ADD COLUMN IF NOT EXISTS commission_value DOUBLE PRECISION;
+        """))
+
+        conn.execute(text("""
+        ALTER TABLE products
+        ADD COLUMN IF NOT EXISTS estimated_conversion_rate DOUBLE PRECISION;
+        """))
