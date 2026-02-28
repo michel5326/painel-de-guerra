@@ -8,6 +8,9 @@ from core.kpi_engine import calculate_kpis
 
 router = APIRouter()
 
+# ======================
+# DATABASE SESSION
+# ======================
 
 def get_db():
     db = SessionLocal()
@@ -16,6 +19,10 @@ def get_db():
     finally:
         db.close()
 
+
+# ======================
+# ROOT
+# ======================
 
 @router.get("/")
 def root():
@@ -40,6 +47,21 @@ def list_products(db: Session = Depends(get_db)):
     return db.query(models.Product).all()
 
 
+@router.delete("/products/{product_id}")
+def delete_product(product_id: int, db: Session = Depends(get_db)):
+    product = db.query(models.Product).filter(
+        models.Product.id == product_id
+    ).first()
+
+    if not product:
+        return {"error": "Product not found"}
+
+    db.delete(product)
+    db.commit()
+
+    return {"message": "Product deleted successfully"}
+
+
 # ======================
 # CAMPAIGNS
 # ======================
@@ -56,6 +78,21 @@ def create_campaign(campaign: dict, db: Session = Depends(get_db)):
 @router.get("/campaigns")
 def list_campaigns(db: Session = Depends(get_db)):
     return db.query(models.Campaign).all()
+
+
+@router.delete("/campaigns/{campaign_id}")
+def delete_campaign(campaign_id: int, db: Session = Depends(get_db)):
+    campaign = db.query(models.Campaign).filter(
+        models.Campaign.id == campaign_id
+    ).first()
+
+    if not campaign:
+        return {"error": "Campaign not found"}
+
+    db.delete(campaign)
+    db.commit()
+
+    return {"message": "Campaign deleted successfully"}
 
 
 # ======================
@@ -76,6 +113,21 @@ def list_keywords(db: Session = Depends(get_db)):
     return db.query(models.Keyword).all()
 
 
+@router.delete("/keywords/{keyword_id}")
+def delete_keyword(keyword_id: int, db: Session = Depends(get_db)):
+    keyword = db.query(models.Keyword).filter(
+        models.Keyword.id == keyword_id
+    ).first()
+
+    if not keyword:
+        return {"error": "Keyword not found"}
+
+    db.delete(keyword)
+    db.commit()
+
+    return {"message": "Keyword deleted successfully"}
+
+
 # ======================
 # LOGS
 # ======================
@@ -93,6 +145,21 @@ def create_log(log: dict, db: Session = Depends(get_db)):
 @router.get("/logs")
 def list_logs(db: Session = Depends(get_db)):
     return db.query(models.DailyLog).all()
+
+
+@router.delete("/logs/{log_id}")
+def delete_log(log_id: int, db: Session = Depends(get_db)):
+    log = db.query(models.DailyLog).filter(
+        models.DailyLog.id == log_id
+    ).first()
+
+    if not log:
+        return {"error": "Log not found"}
+
+    db.delete(log)
+    db.commit()
+
+    return {"message": "Log deleted successfully"}
 
 
 # ======================
@@ -146,7 +213,6 @@ def product_dashboard(product_id: int, db: Session = Depends(get_db)):
             if not logs:
                 continue
 
-            # ordenar por data
             logs_sorted = sorted(logs, key=lambda x: x.date)
 
             cost = sum(log.cost for log in logs_sorted)
@@ -157,10 +223,8 @@ def product_dashboard(product_id: int, db: Session = Depends(get_db)):
             total_revenue += revenue
             total_conversions += conversions
 
-            # ROAS total
             roas = revenue / cost if cost > 0 else 0
 
-            # tendência baseada nos últimos 3 dias
             roas_series = [
                 (log.revenue / log.cost) if log.cost > 0 else 0
                 for log in logs_sorted
@@ -173,11 +237,7 @@ def product_dashboard(product_id: int, db: Session = Depends(get_db)):
                 elif roas_series[-1] < roas_series[-2] < roas_series[-3]:
                     trend = "↓"
 
-            # status
-            if roas >= product.min_roas:
-                status = "🟢"
-            else:
-                status = "🟡"
+            status = "🟢" if roas >= product.min_roas else "🟡"
 
             all_keywords.append({
                 "keyword": keyword.keyword,
@@ -192,10 +252,7 @@ def product_dashboard(product_id: int, db: Session = Depends(get_db)):
     roas_total = total_revenue / total_cost if total_cost > 0 else 0
     cpa_medio = total_cost / total_conversions if total_conversions > 0 else 0
 
-    if roas_total >= product.min_roas:
-        product_status = "🟢 Saudável"
-    else:
-        product_status = "🟡 Sob pressão"
+    product_status = "🟢 Saudável" if roas_total >= product.min_roas else "🟡 Sob pressão"
 
     return {
         "product": product.name,
