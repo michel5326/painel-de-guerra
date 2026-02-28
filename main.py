@@ -70,3 +70,27 @@ def create_campaign(campaign: dict, db: Session = Depends(get_db)):
 @app.get("/campaigns")
 def list_campaigns(db: Session = Depends(get_db)):
     return db.query(models.Campaign).all()
+
+    # ======================
+# KEYWORDS
+# ======================
+
+@app.post("/keywords")
+def create_keyword(keyword: dict, db: Session = Depends(get_db)):
+    new_keyword = models.Keyword(
+        keyword=keyword["keyword"],
+        match_type=keyword["match_type"],
+        intent=keyword["intent"],
+        status=keyword.get("status", "active"),
+        campaign_id=keyword["campaign_id"]
+    )
+    db.add(new_keyword)
+    db.commit()
+    db.refresh(new_keyword)
+
+    return {"id": new_keyword.id, "keyword": new_keyword.keyword}
+
+
+@app.get("/keywords")
+def list_keywords(db: Session = Depends(get_db)):
+    return db.query(models.Keyword).all()
