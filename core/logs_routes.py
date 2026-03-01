@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import SessionLocal
 from core import models
-from datetime import date
 
 router = APIRouter(tags=["Logs"])
 
@@ -72,3 +71,23 @@ def list_logs(db: Session = Depends(get_db)):
         })
 
     return result
+
+
+# ======================
+# DELETE LOG
+# ======================
+
+@router.delete("/logs/{log_id}")
+def delete_log(log_id: int, db: Session = Depends(get_db)):
+
+    log = db.query(models.DailyLog).filter(
+        models.DailyLog.id == log_id
+    ).first()
+
+    if not log:
+        raise HTTPException(status_code=404, detail="Log not found")
+
+    db.delete(log)
+    db.commit()
+
+    return {"message": "Log deleted successfully"}
