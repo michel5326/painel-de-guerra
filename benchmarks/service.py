@@ -23,10 +23,16 @@ def build_account_benchmarks(db: Session):
     commission = product.commission_value or 0
     estimated_cvr = product.estimated_conversion_rate or 0
 
+    total_clicks = global_data.get("clicks_global", 0)
+    total_conversions = global_data.get("conversions_global", 0)
+
     cvr_global = global_data.get("cvr_global", 0)
 
-    # 🔥 Regra oficial Máquina de Guerra
-    cvr_base = cvr_global if cvr_global > 0 else estimated_cvr
+    # 🔥 Regra oficial alinhada ao KPI
+    if total_conversions >= 5:
+        cvr_base = cvr_global
+    else:
+        cvr_base = estimated_cvr
 
     healthy_cpc = commission * cvr_base
 
