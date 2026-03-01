@@ -102,5 +102,29 @@ def run_migration():
         conn.execute(text("""
         ALTER TABLE prospects ALTER COLUMN estimated_cpa DROP NOT NULL;
         """))
+             
+        # =========================
+        # REMOVER NOT NULL LEGADO PRODUCTS
+        # =========================
+
+        conn.execute(text("""
+        ALTER TABLE products ALTER COLUMN avg_ticket DROP NOT NULL;
+        """))
+
+        conn.execute(text("""
+        ALTER TABLE products ALTER COLUMN commission DROP NOT NULL;
+        """))
+
+        conn.execute(text("""
+        ALTER TABLE products ALTER COLUMN margin DROP NOT NULL;
+        """))
+
+        conn.execute(text("""
+        ALTER TABLE products ALTER COLUMN max_cpa DROP NOT NULL;
+        """))
+
+        conn.execute(text("""
+        ALTER TABLE products ALTER COLUMN min_roas DROP NOT NULL;
+        """))
 
         conn.commit()
