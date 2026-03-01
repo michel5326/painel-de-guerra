@@ -75,4 +75,8 @@ def run_migration():
         ALTER TABLE prospects ADD COLUMN IF NOT EXISTS observations TEXT;
         """))
 
+        conn.execute(text("""
+        ALTER TABLE prospects ADD COLUMN IF NOT EXISTS currency VARCHAR
+        """))
+
         conn.commit()

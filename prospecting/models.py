@@ -12,6 +12,7 @@ class Prospect(Base):
     country = Column(String, nullable=False)
 
     search_volume_last_month = Column(Integer, nullable=False)
+    currency = Column(String, nullable=True)
 
     commission_value = Column(Float, nullable=False)
 
