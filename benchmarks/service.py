@@ -12,15 +12,21 @@ def build_account_benchmarks(db: Session):
 
     product = db.query(models.Product).first()
 
-    healthy_cpc = 0
-    if product:
-        healthy_cpc = engine.healthy_cpc(
-            product.commission,
-            global_data["cvr_global"]
-        )
+    if not product:
+        return {
+            **global_data,
+            **last_30d,
+            "healthy_cpc": 0,
+            "message": "Nenhum produto cadastrado"
+        }
+
+    commission = product.commission_value or 0
+    cvr_base = global_data.get("cvr_global", 0)
+
+    healthy_cpc = commission * cvr_base if cvr_base > 0 else 0
 
     return {
         **global_data,
         **last_30d,
-        "healthy_cpc": healthy_cpc
+        "healthy_cpc": round(healthy_cpc, 2)
     }
