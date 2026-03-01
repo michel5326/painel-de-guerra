@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-
-from core.models import DailyLog, Keyword
+from core.models import DailyLog
 
 
 class LearningEngine:
@@ -17,16 +16,13 @@ class LearningEngine:
     def global_benchmarks(self):
 
         totals = self.db.query(
-            func.sum(DailyLog.impressions),
-            func.sum(DailyLog.clicks),
-            func.sum(DailyLog.conversions),
-            func.sum(DailyLog.cost)
-        ).one()
+            func.coalesce(func.sum(DailyLog.impressions), 0),
+            func.coalesce(func.sum(DailyLog.clicks), 0),
+            func.coalesce(func.sum(DailyLog.conversions), 0),
+            func.coalesce(func.sum(DailyLog.cost), 0)
+        ).first()
 
-        impressions = totals[0] or 0
-        clicks = totals[1] or 0
-        conversions = totals[2] or 0
-        cost = totals[3] or 0
+        impressions, clicks, conversions, cost = totals
 
         ctr = clicks / impressions if impressions > 0 else 0
         cvr = conversions / clicks if clicks > 0 else 0
@@ -49,18 +45,15 @@ class LearningEngine:
         cutoff = datetime.utcnow().date() - timedelta(days=30)
 
         totals = self.db.query(
-            func.sum(DailyLog.impressions),
-            func.sum(DailyLog.clicks),
-            func.sum(DailyLog.conversions),
-            func.sum(DailyLog.cost)
+            func.coalesce(func.sum(DailyLog.impressions), 0),
+            func.coalesce(func.sum(DailyLog.clicks), 0),
+            func.coalesce(func.sum(DailyLog.conversions), 0),
+            func.coalesce(func.sum(DailyLog.cost), 0)
         ).filter(
             DailyLog.date >= cutoff
-        ).one()
+        ).first()
 
-        impressions = totals[0] or 0
-        clicks = totals[1] or 0
-        conversions = totals[2] or 0
-        cost = totals[3] or 0
+        impressions, clicks, conversions, cost = totals
 
         ctr = clicks / impressions if impressions > 0 else 0
         cvr = conversions / clicks if clicks > 0 else 0
@@ -77,4 +70,6 @@ class LearningEngine:
     # =========================
 
     def healthy_cpc(self, commission: float, cvr: float):
+        if not commission or not cvr:
+            return 0
         return round(commission * cvr, 2)
