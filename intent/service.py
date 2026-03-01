@@ -28,7 +28,7 @@ def build_intent_analysis(product_id: int, db: Session):
             cost = sum(log.cost for log in logs)
             conversions = sum(log.conversions for log in logs)
 
-            intent = keyword.intent
+            intent = keyword.intent.strip().lower()
 
             if intent not in intent_data:
                 intent_data[intent] = {
