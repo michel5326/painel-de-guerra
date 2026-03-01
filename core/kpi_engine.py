@@ -7,36 +7,35 @@ def calculate_kpis(logs, product):
 
     ctr = clicks / impressions if impressions > 0 else 0
     cpc = cost / clicks if clicks > 0 else 0
-    cvr = conversions / clicks if clicks > 0 else 0
+    cvr_real = conversions / clicks if clicks > 0 else 0
     cpa = cost / conversions if conversions > 0 else 0
-    roas = revenue / cost if cost > 0 else 0
 
-    break_even_cpc = product.max_cpa * cvr if cvr > 0 else 0
+    # 🔥 Modelo oficial Máquina de Guerra
+    conversion_base = (
+        cvr_real if conversions >= 5
+        else product.estimated_conversion_rate
+    )
+
+    healthy_cpc = product.commission_value * conversion_base
     margem_real = revenue - cost
-    conversoes_minimas = cost / product.max_cpa if product.max_cpa > 0 else 0
 
-    if conversions == 0 and cost > product.max_cpa:
-        status = "🔴 Inviável"
-    elif roas >= product.min_roas:
-        status = "🟢 Saudável"
-    elif roas < product.min_roas:
-        status = "🟡 Sob pressão"
+    if cpc > healthy_cpc:
+        status = "🔴 CPC Acima do Viável"
+    elif cpc > healthy_cpc * 0.8:
+        status = "🟡 Zona de Atenção"
     else:
-        status = "⚪ Dados insuficientes"
+        status = "🟢 Operando Saudável"
 
     return {
         "impressions": impressions,
         "clicks": clicks,
-        "cost": cost,
+        "cost": round(cost, 2),
         "conversions": conversions,
-        "revenue": revenue,
+        "revenue": round(revenue, 2),
         "CTR": round(ctr, 4),
         "CPC": round(cpc, 2),
-        "CVR": round(cvr, 4),
-        "CPA": round(cpa, 2),
-        "ROAS": round(roas, 2),
-        "break_even_CPC": round(break_even_cpc, 2),
+        "CVR_real": round(cvr_real, 4),
+        "healthy_CPC": round(healthy_cpc, 2),
         "margem_real": round(margem_real, 2),
-        "conversoes_minimas_para_empate": round(conversoes_minimas, 2),
         "status": status
     }
