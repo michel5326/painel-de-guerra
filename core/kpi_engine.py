@@ -8,15 +8,17 @@ def calculate_kpis(logs, product):
     ctr = clicks / impressions if impressions > 0 else 0
     cpc = cost / clicks if clicks > 0 else 0
     cvr_real = conversions / clicks if clicks > 0 else 0
-    cpa = cost / conversions if conversions > 0 else 0
 
-    # 🔥 Modelo oficial Máquina de Guerra
+    # 🔥 Modelo oficial Máquina de Guerra (100% CPC-based)
+    estimated_cvr = product.estimated_conversion_rate or 0
+
     conversion_base = (
         cvr_real if conversions >= 5
-        else product.estimated_conversion_rate
+        else estimated_cvr
     )
 
     healthy_cpc = product.commission_value * conversion_base
+    gap = healthy_cpc - cpc
     margem_real = revenue - cost
 
     if cpc > healthy_cpc:
@@ -35,7 +37,9 @@ def calculate_kpis(logs, product):
         "CTR": round(ctr, 4),
         "CPC": round(cpc, 2),
         "CVR_real": round(cvr_real, 4),
+        "conversion_base": round(conversion_base, 4),
         "healthy_CPC": round(healthy_cpc, 2),
+        "gap": round(gap, 2),
         "margem_real": round(margem_real, 2),
         "status": status
     }

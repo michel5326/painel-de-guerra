@@ -21,13 +21,10 @@ def get_db():
 
 @router.post("/keywords")
 def create_keyword(keyword: dict, db: Session = Depends(get_db)):
-
     new_keyword = models.Keyword(**keyword)
-
     db.add(new_keyword)
     db.commit()
     db.refresh(new_keyword)
-
     return new_keyword
 
 
@@ -91,16 +88,19 @@ def delete_keyword(keyword_id: int, db: Session = Depends(get_db)):
 @router.get("/keywords/{keyword_id}/kpis")
 def get_keyword_kpis(keyword_id: int, db: Session = Depends(get_db)):
 
-    logs = db.query(models.DailyLog).filter(
-        models.DailyLog.keyword_id == keyword_id
-    ).all()
-
     keyword = db.query(models.Keyword).filter(
         models.Keyword.id == keyword_id
     ).first()
 
     if not keyword:
         raise HTTPException(status_code=404, detail="Keyword not found")
+
+    if not keyword.campaign or not keyword.campaign.product:
+        raise HTTPException(status_code=400, detail="Keyword sem produto vinculado")
+
+    logs = db.query(models.DailyLog).filter(
+        models.DailyLog.keyword_id == keyword_id
+    ).all()
 
     if not logs:
         return {
@@ -112,7 +112,9 @@ def get_keyword_kpis(keyword_id: int, db: Session = Depends(get_db)):
             "CTR": 0,
             "CPC": 0,
             "CVR_real": 0,
+            "conversion_base": 0,
             "healthy_CPC": 0,
+            "gap": 0,
             "margem_real": 0,
             "status": "NO_DATA"
         }

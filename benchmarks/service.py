@@ -21,12 +21,18 @@ def build_account_benchmarks(db: Session):
         }
 
     commission = product.commission_value or 0
-    cvr_base = global_data.get("cvr_global", 0)
+    estimated_cvr = product.estimated_conversion_rate or 0
 
-    healthy_cpc = commission * cvr_base if cvr_base > 0 else 0
+    cvr_global = global_data.get("cvr_global", 0)
+
+    # 🔥 Regra oficial Máquina de Guerra
+    cvr_base = cvr_global if cvr_global > 0 else estimated_cvr
+
+    healthy_cpc = commission * cvr_base
 
     return {
         **global_data,
         **last_30d,
-        "healthy_cpc": round(healthy_cpc, 2)
+        "healthy_cpc": round(healthy_cpc, 2),
+        "cvr_base_used": round(cvr_base, 4)
     }
