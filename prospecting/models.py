@@ -8,20 +8,15 @@ class Prospect(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     product_name = Column(String, nullable=False)
-    niche = Column(String, nullable=False)
+    platform = Column(String, nullable=False)
     country = Column(String, nullable=False)
 
-    main_intent = Column(String, nullable=False)
+    search_volume_last_month = Column(Integer, nullable=False)
 
-    avg_ticket = Column(Float, nullable=False)
-    commission_percent = Column(Float, nullable=False)
-    estimated_cpa = Column(Float, nullable=False)
+    commission_value = Column(Float, nullable=False)
 
-    structure_observed = Column(Text, nullable=True)
-    angles_identified = Column(Text, nullable=True)
+    top_bid_low = Column(Float, nullable=False)
+    top_bid_high = Column(Float, nullable=False)
 
-    strengths = Column(Text, nullable=True)
-    weaknesses = Column(Text, nullable=True)
-
-    opportunity_score = Column(Float, nullable=True)
-    risk_level = Column(String, nullable=True)
+    temperature_ranking = Column(String, nullable=True)
+    observations = Column(Text, nullable=True)
