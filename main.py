@@ -11,7 +11,6 @@ from core.routes import router as core_router
 from prospecting.routes import router as prospect_router
 from funnel.routes import router as funnel_router
 from benchmarks.routes import router as benchmarks_router
-from benchmarks.routes import router as benchmarks_router
 from core.products_routes import router as products_router
 from core.campaigns_routes import router as campaigns_router
 from core.keywords_routes import router as keywords_router
@@ -37,8 +36,8 @@ app.add_middleware(
 # =========================
 # DATABASE INIT
 # =========================
-run_migration()
 Base.metadata.create_all(bind=engine)
+run_migration()
 
 # =========================
 # ROUTERS
@@ -47,8 +46,6 @@ app.include_router(core_router)
 app.include_router(prospect_router)
 app.include_router(funnel_router)
 app.include_router(benchmarks_router)
-app.include_router(benchmarks_router)
-
 app.include_router(products_router)
 app.include_router(campaigns_router)
 app.include_router(keywords_router)

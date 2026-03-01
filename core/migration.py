@@ -5,6 +5,10 @@ from db import engine
 def run_migration():
     with engine.connect() as conn:
 
+        # =========================
+        # DAILY LOGS
+        # =========================
+
         conn.execute(text("""
         ALTER TABLE daily_logs
         ADD COLUMN IF NOT EXISTS visitors INTEGER DEFAULT 0;
@@ -25,10 +29,8 @@ def run_migration():
         ADD COLUMN IF NOT EXISTS bounce_rate DOUBLE PRECISION;
         """))
 
-        conn.commit()
-
-                # =========================
-        # PRODUCT UPDATE
+        # =========================
+        # PRODUCTS
         # =========================
 
         conn.execute(text("""
@@ -40,3 +42,5 @@ def run_migration():
         ALTER TABLE products
         ADD COLUMN IF NOT EXISTS estimated_conversion_rate DOUBLE PRECISION;
         """))
+
+        conn.commit()
