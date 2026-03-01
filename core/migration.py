@@ -30,7 +30,7 @@ def run_migration():
         """))
 
         # =========================
-        # PRODUCTS
+        # PRODUCTS (novo modelo CPC)
         # =========================
 
         conn.execute(text("""
@@ -44,7 +44,7 @@ def run_migration():
         """))
 
         # =========================
-        # PROSPECTS
+        # PROSPECTS (novo modelo CPA fixo)
         # =========================
 
         conn.execute(text("""
@@ -76,7 +76,31 @@ def run_migration():
         """))
 
         conn.execute(text("""
-        ALTER TABLE prospects ADD COLUMN IF NOT EXISTS currency VARCHAR
+        ALTER TABLE prospects ADD COLUMN IF NOT EXISTS currency VARCHAR;
+        """))
+
+        # =========================
+        # REMOVER OBRIGATORIEDADE ANTIGA (LEGADO)
+        # =========================
+
+        conn.execute(text("""
+        ALTER TABLE prospects ALTER COLUMN niche DROP NOT NULL;
+        """))
+
+        conn.execute(text("""
+        ALTER TABLE prospects ALTER COLUMN main_intent DROP NOT NULL;
+        """))
+
+        conn.execute(text("""
+        ALTER TABLE prospects ALTER COLUMN avg_ticket DROP NOT NULL;
+        """))
+
+        conn.execute(text("""
+        ALTER TABLE prospects ALTER COLUMN commission_percent DROP NOT NULL;
+        """))
+
+        conn.execute(text("""
+        ALTER TABLE prospects ALTER COLUMN estimated_cpa DROP NOT NULL;
         """))
 
         conn.commit()
