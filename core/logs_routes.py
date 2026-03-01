@@ -21,20 +21,7 @@ def get_db():
 @router.post("/logs")
 def create_log(log: dict, db: Session = Depends(get_db)):
 
-    new_log = models.DailyLog(
-        date=log["date"],
-        impressions=log["impressions"],
-        clicks=log["clicks"],
-        cost=log["cost"],
-        conversions=log["conversions"],
-        revenue=log["revenue"],
-        keyword_id=log["keyword_id"],
-        visitors=log.get("visitors", 0),
-        checkouts=log.get("checkouts", 0),
-        upsells=log.get("upsells", 0),
-        bounce_rate=log.get("bounce_rate")
-    )
-
+    new_log = models.DailyLog(**log)
     db.add(new_log)
     db.commit()
     db.refresh(new_log)
@@ -71,6 +58,30 @@ def list_logs(db: Session = Depends(get_db)):
         })
 
     return result
+
+
+# ======================
+# UPDATE LOG
+# ======================
+
+@router.put("/logs/{log_id}")
+def update_log(log_id: int, updated_data: dict, db: Session = Depends(get_db)):
+
+    log = db.query(models.DailyLog).filter(
+        models.DailyLog.id == log_id
+    ).first()
+
+    if not log:
+        raise HTTPException(status_code=404, detail="Log not found")
+
+    for key, value in updated_data.items():
+        if hasattr(log, key):
+            setattr(log, key, value)
+
+    db.commit()
+    db.refresh(log)
+
+    return log
 
 
 # ======================
