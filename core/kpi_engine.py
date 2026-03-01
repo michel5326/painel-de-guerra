@@ -21,12 +21,40 @@ def calculate_kpis(logs, product):
     gap = healthy_cpc - cpc
     margem_real = revenue - cost
 
+    # ==========================
+    # STATUS OPERACIONAL
+    # ==========================
     if cpc > healthy_cpc:
         status = "🔴 CPC Acima do Viável"
     elif cpc > healthy_cpc * 0.8:
         status = "🟡 Zona de Atenção"
     else:
         status = "🟢 Operando Saudável"
+
+    # ==========================
+    # SCORE OPERACIONAL (0–100)
+    # ==========================
+
+    # 1️⃣ Viabilidade (0–50)
+    if gap > 0:
+        viability_score = min(gap * 10, 50)
+    else:
+        viability_score = max(50 + (gap * 20), 0)
+
+    # 2️⃣ Eficiência (0–30)
+    if estimated_cvr > 0:
+        efficiency_ratio = cvr_real / estimated_cvr
+        efficiency_score = min(efficiency_ratio * 30, 30)
+    else:
+        efficiency_score = 0
+
+    # 3️⃣ Volume (0–20)
+    volume_score = min(clicks / 10, 20)
+
+    operational_score = round(
+        min(viability_score + efficiency_score + volume_score, 100),
+        1
+    )
 
     return {
         "impressions": impressions,
@@ -41,5 +69,6 @@ def calculate_kpis(logs, product):
         "healthy_CPC": round(healthy_cpc, 2),
         "gap": round(gap, 2),
         "margem_real": round(margem_real, 2),
-        "status": status
+        "status": status,
+        "operational_score": operational_score
     }
