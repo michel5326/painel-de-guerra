@@ -41,6 +41,29 @@ def list_products(db: Session = Depends(get_db)):
 
 
 # ======================
+# UPDATE PRODUCT
+# ======================
+
+@router.put("/products/{product_id}", response_model=ProductResponse)
+def update_product(product_id: int, updated_data: ProductCreate, db: Session = Depends(get_db)):
+
+    product = db.query(models.Product).filter(
+        models.Product.id == product_id
+    ).first()
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    for key, value in updated_data.model_dump().items():
+        setattr(product, key, value)
+
+    db.commit()
+    db.refresh(product)
+
+    return product
+
+
+# ======================
 # DELETE PRODUCT
 # ======================
 
