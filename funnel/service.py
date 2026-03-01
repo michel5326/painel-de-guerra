@@ -1,8 +1,3 @@
-from sqlalchemy.orm import Session
-from core import models
-from core.learning_engine import LearningEngine
-
-
 def build_keyword_funnel(keyword_id: int, db: Session):
 
     logs = db.query(models.DailyLog).filter(
@@ -25,8 +20,13 @@ def build_keyword_funnel(keyword_id: int, db: Session):
     sales_rate = sales / checkouts if checkouts > 0 else 0
     upsell_rate = upsells / sales if sales > 0 else 0
 
-    engine = LearningEngine(db)
-    global_data = engine.global_benchmarks()
+    # 🔥 PROTEÇÃO TOTAL
+    try:
+        engine = LearningEngine(db)
+        global_data = engine.global_benchmarks() or {}
+        ctr_global = global_data.get("ctr_global", 0)
+    except Exception:
+        ctr_global = 0
 
     def deviation(current, benchmark):
         if benchmark == 0:
@@ -41,7 +41,7 @@ def build_keyword_funnel(keyword_id: int, db: Session):
 
     suggestions = []
 
-    if deviation(ctr, global_data["ctr_global"]) == "DESVIO_GRAVE":
+    if deviation(ctr, ctr_global) == "DESVIO_GRAVE":
         suggestions.append("CTR muito abaixo do padrão histórico.")
 
     if checkout_rate < 0.2 and visitors > 50:
