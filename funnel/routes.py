@@ -14,7 +14,7 @@ def get_db():
         db.close()
 
 
-@router.get("/keywords/{keyword_id}")
+@router.get("/keywords/{keyword_id}/")
 def get_keyword_funnel(keyword_id: int, db: Session = Depends(get_db)):
 
     data = build_keyword_funnel(keyword_id, db)
