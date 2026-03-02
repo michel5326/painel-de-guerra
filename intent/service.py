@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from core import models
 
 
-def build_intent_performance(product_id: int, db: Session):
+def build_intent_analysis(product_id: int, db: Session):
 
     product = db.query(models.Product).filter(
         models.Product.id == product_id
@@ -84,9 +84,9 @@ def build_intent_performance(product_id: int, db: Session):
             "impressions": impressions,
             "clicks": clicks,
             "conversions": conversions,
-            "CTR": round(ctr * 100, 2),  # agora já vem em %
+            "CTR": round(ctr * 100, 2),   # já retorna em %
             "CPC": round(cpc, 2),
-            "CVR": round(cvr_real * 100, 2),  # em %
+            "CVR": round(cvr_real * 100, 2),  # já retorna em %
             "healthy_CPC": round(healthy_cpc, 2),
             "gap": round(gap, 2),
             "status": status
