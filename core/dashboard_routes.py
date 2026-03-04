@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from datetime import date
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from db import SessionLocal
 from core import models
@@ -16,7 +17,12 @@ def get_db():
 
 
 @router.get("/products/{product_id}/dashboard")
-def product_dashboard(product_id: int, db: Session = Depends(get_db)):
+def product_dashboard(
+    product_id: int,
+    start_date: date | None = Query(default=None),
+    end_date: date | None = Query(default=None),
+    db: Session = Depends(get_db)
+):
 
     product = db.query(models.Product).filter(
         models.Product.id == product_id
@@ -30,10 +36,17 @@ def product_dashboard(product_id: int, db: Session = Depends(get_db)):
     for campaign in product.campaigns or []:
         for keyword in campaign.keywords or []:
 
-            logs = db.query(models.DailyLog).filter(
+            query = db.query(models.DailyLog).filter(
                 models.DailyLog.keyword_id == keyword.id
-            ).all()
+            )
 
+            if start_date:
+                query = query.filter(models.DailyLog.date >= start_date)
+
+            if end_date:
+                query = query.filter(models.DailyLog.date <= end_date)
+
+            logs = query.all()
             all_logs.extend(logs)
 
     if not all_logs:
@@ -46,5 +59,7 @@ def product_dashboard(product_id: int, db: Session = Depends(get_db)):
 
     return {
         "product": product.name,
+        "start_date": start_date,
+        "end_date": end_date,
         **kpis
     }

@@ -1,8 +1,14 @@
+from datetime import date
 from sqlalchemy.orm import Session
 from core import models
 
 
-def build_intent_analysis(product_id: int, db: Session):
+def build_intent_analysis(
+    product_id: int,
+    db: Session,
+    start_date: date | None = None,
+    end_date: date | None = None
+):
 
     product = db.query(models.Product).filter(
         models.Product.id == product_id
@@ -19,9 +25,17 @@ def build_intent_analysis(product_id: int, db: Session):
     for campaign in product.campaigns or []:
         for keyword in campaign.keywords or []:
 
-            logs = db.query(models.DailyLog).filter(
+            query = db.query(models.DailyLog).filter(
                 models.DailyLog.keyword_id == keyword.id
-            ).all()
+            )
+
+            if start_date:
+                query = query.filter(models.DailyLog.date >= start_date)
+
+            if end_date:
+                query = query.filter(models.DailyLog.date <= end_date)
+
+            logs = query.all()
 
             if not logs:
                 continue
@@ -63,7 +77,7 @@ def build_intent_analysis(product_id: int, db: Session):
         cpc = cost / clicks if clicks > 0 else 0
         cvr_real = conversions / clicks if clicks > 0 else 0
 
-        # 🔒 Regra de proteção estatística (>=5 conversões)
+        # 🔒 Regra de proteção estatística
         conversion_base = (
             cvr_real if conversions >= 5
             else estimated_cvr
@@ -72,7 +86,7 @@ def build_intent_analysis(product_id: int, db: Session):
         healthy_cpc = commission * conversion_base
         gap = healthy_cpc - cpc
 
-        # Status estrutural por intenção
+        # Status estrutural
         if gap < 0:
             status = "🔴 Inviável"
         elif gap < healthy_cpc * 0.2:
@@ -84,9 +98,9 @@ def build_intent_analysis(product_id: int, db: Session):
             "impressions": impressions,
             "clicks": clicks,
             "conversions": conversions,
-            "CTR": round(ctr * 100, 2),   # já retorna em %
+            "CTR": round(ctr * 100, 2),
             "CPC": round(cpc, 2),
-            "CVR": round(cvr_real * 100, 2),  # já retorna em %
+            "CVR": round(cvr_real * 100, 2),
             "healthy_CPC": round(healthy_cpc, 2),
             "gap": round(gap, 2),
             "status": status

@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from datetime import date
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from db import SessionLocal
 from intent.service import build_intent_analysis
@@ -15,9 +16,14 @@ def get_db():
 
 
 @router.get("/products/{product_id}/intent-analysis")
-def product_intent_analysis(product_id: int, db: Session = Depends(get_db)):
+def product_intent_analysis(
+    product_id: int,
+    start_date: date | None = Query(default=None),
+    end_date: date | None = Query(default=None),
+    db: Session = Depends(get_db)
+):
 
-    result = build_intent_analysis(product_id, db)
+    result = build_intent_analysis(product_id, db, start_date, end_date)
 
     if result is None:
         raise HTTPException(status_code=404, detail="Product not found")
