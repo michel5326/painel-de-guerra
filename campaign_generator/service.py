@@ -6,9 +6,12 @@ MAX_DESCRIPTION = 90
 
 
 def safe_text(text, limit):
+    text = text.strip()
+
     if len(text) <= limit:
         return text
-    return text[:limit]
+
+    return text[:limit].strip()
 
 
 class CampaignGeneratorService:
@@ -17,27 +20,27 @@ class CampaignGeneratorService:
 
         product_name = product_name.title()
 
-        if country == "BR":
-            templates = headlines_pt
-        else:
-            templates = headlines_en
+        templates = headlines_pt if country == "BR" else headlines_en
 
         headlines = []
 
-        price = int(price)
+        price = int(price) if price else 0
         discount = int(discount_value) if discount_value else 0
         discount_percent = int(discount_percent) if discount_percent else 0
 
         for template in templates:
 
-            headline = template.replace("{product}", product_name)
+            headline = template
+
+            headline = headline.replace("{product}", product_name)
             headline = headline.replace("{price}", str(price))
             headline = headline.replace("{discount}", str(discount))
             headline = headline.replace("{discount_percent}", str(discount_percent))
 
             headline = safe_text(headline, MAX_HEADLINE)
 
-            headlines.append(headline)
+            if headline and headline not in headlines:
+                headlines.append(headline)
 
         return headlines[:15]
 
@@ -46,25 +49,25 @@ class CampaignGeneratorService:
 
         product_name = product_name.title()
 
-        if country == "BR":
-            templates = descriptions_pt
-        else:
-            templates = descriptions_en
+        templates = descriptions_pt if country == "BR" else descriptions_en
 
         descriptions = []
 
-        price = int(price)
+        price = int(price) if price else 0
         discount = int(discount_value) if discount_value else 0
 
         for template in templates:
 
-            description = template.replace("{product}", product_name)
+            description = template
+
+            description = description.replace("{product}", product_name)
             description = description.replace("{price}", str(price))
             description = description.replace("{discount}", str(discount))
 
             description = safe_text(description, MAX_DESCRIPTION)
 
-            descriptions.append(description)
+            if description and description not in descriptions:
+                descriptions.append(description)
 
         return descriptions[:4]
 

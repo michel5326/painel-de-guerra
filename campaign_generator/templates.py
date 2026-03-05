@@ -4,24 +4,32 @@
 
 headlines_en = [
 
-"Buy {product} Today",
+# Price
 "Only ${price} Per Bottle",
+"Only ${price} Today",
+"${price} Limited Offer",
+
+# Discount
 "Save Up To ${discount}",
 "{discount_percent}% Off Today",
-"Official {product} Website",
+"Big Discount Today",
 
+# Purchase intent
+"Buy {product} Today",
+"Order {product} Now",
+
+# Trust
+"Official {product} Website",
+"Official {product} Store",
+"Secure Checkout",
+
+# Shipping
 "Free Shipping Available",
 "Fast Delivery Available",
+
+# Urgency
 "Limited Time Discount",
-"Best Offer Just Today",
-
-"Secure Checkout",
-"Order {product} Now",
-"Official {product} Store",
-"Exclusive Promotion Today",
-
-"Special Deal Today",
-"Last Hours Discount"
+"Best Offer Today"
 ]
 
 
@@ -31,24 +39,32 @@ headlines_en = [
 
 headlines_pt = [
 
-"Compre {product} Hoje",
+# Price
 "Apenas R${price} por Unidade",
+"Apenas R${price} Hoje",
+"R${price} Oferta Especial",
+
+# Discount
 "Economize até R${discount}",
 "{discount_percent}% de Desconto",
-"Site Oficial {product}",
+"Grande Desconto Hoje",
 
+# Purchase intent
+"Compre {product} Hoje",
+"Peça {product} Agora",
+
+# Trust
+"Site Oficial {product}",
+"Loja Oficial {product}",
+"Compra Segura",
+
+# Shipping
 "Frete Grátis Disponível",
 "Entrega Rápida",
+
+# Urgency
 "Oferta por Tempo Limitado",
-"Melhor Oferta de Hoje",
-
-"Compra Segura",
-"Peça {product} Agora",
-"Loja Oficial {product}",
-"Promoção Exclusiva",
-
-"Oferta Especial Hoje",
-"Últimas Horas de Desconto"
+"Melhor Oferta Hoje"
 ]
 
 
@@ -58,13 +74,13 @@ headlines_pt = [
 
 descriptions_en = [
 
-"Buy {product} Today For Only ${price}. Limited Time Offer.",
+"Buy {product} Today For Only ${price}. Limited Time Offer With Secure Checkout.",
 
-"Save Up To ${discount}. Order From Official Website.",
+"Save Up To ${discount} Today. Order {product} From The Official Website.",
 
-"Free Shipping Available. Secure Checkout Guaranteed.",
+"Free Shipping Available. Get {product} Today With Fast Delivery.",
 
-"Limited Stock Available. Get The Official Offer Now."
+"Limited Stock Available. Grab The Official {product} Offer Now."
 ]
 
 
@@ -74,11 +90,11 @@ descriptions_en = [
 
 descriptions_pt = [
 
-"Compre {product} Hoje por Apenas R${price}. Oferta Limitada.",
+"Compre {product} Hoje por Apenas R${price}. Oferta Limitada com Compra Segura.",
 
-"Economize até R${discount}. Peça no Site Oficial.",
+"Economize até R${discount} Hoje. Peça {product} no Site Oficial.",
 
-"Frete Grátis Disponível. Compra 100% Segura.",
+"Frete Grátis Disponível. Receba {product} com Entrega Rápida.",
 
-"Estoque Limitado. Aproveite a Oferta Agora."
+"Estoque Limitado. Aproveite a Oferta Oficial de {product} Agora."
 ]
