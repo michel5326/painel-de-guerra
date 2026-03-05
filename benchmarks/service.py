@@ -3,14 +3,16 @@ from core.learning_engine import LearningEngine
 from core import models
 
 
-def build_account_benchmarks(db: Session):
+def build_account_benchmarks(product_id: int, db: Session):
 
     engine = LearningEngine(db)
 
     global_data = engine.global_benchmarks()
     last_30d = engine.last_30d_benchmarks()
 
-    product = db.query(models.Product).first()
+    product = db.query(models.Product).filter(
+        models.Product.id == product_id
+    ).first()
 
     if not product:
         return {
@@ -18,7 +20,7 @@ def build_account_benchmarks(db: Session):
             **last_30d,
             "healthy_cpc": 0,
             "baseline_cvr": 0,
-            "message": "Nenhum produto cadastrado"
+            "message": "Produto não encontrado"
         }
 
     commission = product.commission_value or 0

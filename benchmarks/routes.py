@@ -14,6 +14,6 @@ def get_db():
         db.close()
 
 
-@router.get("/benchmarks")
-def get_account_benchmarks(db: Session = Depends(get_db)):
-    return build_account_benchmarks(db)
+@router.get("/benchmarks/{product_id}")
+def get_account_benchmarks(product_id: int, db: Session = Depends(get_db)):
+    return build_account_benchmarks(product_id, db)
