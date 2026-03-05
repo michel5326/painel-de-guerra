@@ -19,20 +19,21 @@ def build_account_benchmarks(product_id: int, db: Session):
             **global_data,
             **last_30d,
             "healthy_cpc": 0,
-            "baseline_cvr": 0,
+            "cvr_base_used": 0,
             "message": "Produto não encontrado"
         }
 
     commission = product.commission_value or 0
     estimated_cvr = product.estimated_conversion_rate or 0
-    baseline_cvr = product.baseline_conversion_rate or 0.01
 
     total_clicks = global_data.get("clicks_global", 0)
     total_conversions = global_data.get("conversions_global", 0)
 
     cvr_global = global_data.get("cvr_global", 0)
 
+    # ==========================
     # Regra de proteção estatística
+    # ==========================
     if total_conversions >= 5:
         cvr_base = cvr_global
     else:
@@ -40,9 +41,14 @@ def build_account_benchmarks(product_id: int, db: Session):
 
     healthy_cpc = commission * cvr_base
 
-    # Probabilidade de ainda não ter conversão baseada no baseline
+    # ==========================
+    # Probabilidade de ainda não ter conversão
+    # ==========================
+
+    cvr_prob = estimated_cvr if estimated_cvr > 0 else 0.01
+
     if total_clicks > 0:
-        probability_no_conversion = (1 - baseline_cvr) ** total_clicks
+        probability_no_conversion = (1 - cvr_prob) ** total_clicks
     else:
         probability_no_conversion = 1
 
@@ -51,6 +57,6 @@ def build_account_benchmarks(product_id: int, db: Session):
         **last_30d,
         "healthy_cpc": round(healthy_cpc, 2),
         "cvr_base_used": round(cvr_base, 4),
-        "baseline_cvr": round(baseline_cvr, 4),
+        "estimated_cvr": round(estimated_cvr, 4),
         "probability_no_conversion": round(probability_no_conversion * 100, 2)
     }

@@ -30,6 +30,11 @@ class LearningEngine:
         clicks_per_sale = clicks / conversions if conversions > 0 else 0
 
         return {
+            "impressions_global": impressions,
+            "clicks_global": clicks,
+            "conversions_global": conversions,
+            "cost_global": cost,
+
             "ctr_global": round(ctr, 4),
             "cvr_global": round(cvr, 4),
             "cpc_global": round(cpc, 2),
@@ -60,6 +65,11 @@ class LearningEngine:
         cpc = cost / clicks if clicks > 0 else 0
 
         return {
+            "impressions_30d": impressions,
+            "clicks_30d": clicks,
+            "conversions_30d": conversions,
+            "cost_30d": cost,
+
             "ctr_30d": round(ctr, 4),
             "cvr_30d": round(cvr, 4),
             "cpc_30d": round(cpc, 2)
