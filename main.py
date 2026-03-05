@@ -19,6 +19,7 @@ from core.logs_routes import router as logs_router
 from core.dashboard_routes import router as dashboard_router
 from intent.routes import router as intent_router
 from product_intelligence.routes import router as product_intelligence_router
+from campaign_generator.routes import router as campaign_generator_router
 
 app = FastAPI(
     title="Máquina de Guerra API",
@@ -64,6 +65,7 @@ app.include_router(logs_router)
 app.include_router(dashboard_router)
 app.include_router(intent_router)
 app.include_router(product_intelligence_router)
+app.include_router(campaign_generator_router)
 
 # =========================
 # HEALTH CHECK
