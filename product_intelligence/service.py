@@ -105,6 +105,30 @@ def build_strategic_dashboard(product_id: int, db: Session):
     else:
         status = "🟢 Estruturalmente Saudável"
 
+    # ==================================
+    # TEST BUDGET CONTROL
+    # ==================================
+
+    commission = product.commission_value or 0
+    test_budget_limit = commission * 3
+
+    # progresso do teste
+    test_progress = (
+        (total_cost / test_budget_limit) * 100
+        if test_budget_limit > 0
+        else 0
+    )
+
+    if total_cost >= test_budget_limit and total_conversions == 0:
+        test_budget_status = "🔴 Kill Product (Budget Exceeded)"
+        recommendation = "STOP TEST"
+    elif total_cost >= commission * 2 and total_conversions == 0:
+        test_budget_status = "🟠 High Risk"
+        recommendation = "Monitor Closely"
+    else:
+        test_budget_status = "🟢 Within Test Budget"
+        recommendation = "Continue Testing"
+
     return {
         "product": product.name,
         "cpc_medio": round(cpc_medio, 2),
@@ -115,5 +139,11 @@ def build_strategic_dashboard(product_id: int, db: Session):
         "custo_total": round(total_cost, 2),
         "margem_real_total": round(margem_real_total, 2),
         "conversoes_totais": total_conversions,
-        "percentual_custo_em_risco": round(percentual_custo_em_risco, 1)
+        "percentual_custo_em_risco": round(percentual_custo_em_risco, 1),
+
+        # TEST MONITOR
+        "test_budget_limit": round(test_budget_limit, 2),
+        "test_budget_status": test_budget_status,
+        "test_progress": round(test_progress, 1),
+        "recommendation": recommendation
     }
