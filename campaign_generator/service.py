@@ -1,9 +1,21 @@
 from .templates import headlines_en, headlines_pt, descriptions_en, descriptions_pt
 
 
+MAX_HEADLINE = 30
+MAX_DESCRIPTION = 90
+
+
+def safe_text(text, limit):
+    if len(text) <= limit:
+        return text
+    return text[:limit]
+
+
 class CampaignGeneratorService:
 
     def generate_headlines(self, product_name, price, discount_value, discount_percent, country):
+
+        product_name = product_name.title()
 
         if country == "BR":
             templates = headlines_pt
@@ -14,6 +26,7 @@ class CampaignGeneratorService:
 
         price = int(price)
         discount = int(discount_value) if discount_value else 0
+        discount_percent = int(discount_percent) if discount_percent else 0
 
         for template in templates:
 
@@ -22,12 +35,16 @@ class CampaignGeneratorService:
             headline = headline.replace("{discount}", str(discount))
             headline = headline.replace("{discount_percent}", str(discount_percent))
 
+            headline = safe_text(headline, MAX_HEADLINE)
+
             headlines.append(headline)
 
         return headlines[:15]
 
 
     def generate_descriptions(self, product_name, price, discount_value, country):
+
+        product_name = product_name.title()
 
         if country == "BR":
             templates = descriptions_pt
@@ -44,6 +61,8 @@ class CampaignGeneratorService:
             description = template.replace("{product}", product_name)
             description = description.replace("{price}", str(price))
             description = description.replace("{discount}", str(discount))
+
+            description = safe_text(description, MAX_DESCRIPTION)
 
             descriptions.append(description)
 
@@ -86,6 +105,8 @@ class CampaignGeneratorService:
 
 
     def generate_campaign_structure(self, product_name, price, discount_value, discount_percent, country):
+
+        product_name = product_name.title()
 
         headlines = self.generate_headlines(
             product_name,
