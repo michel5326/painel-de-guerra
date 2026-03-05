@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 from db import engine, Base
 
 # IMPORTANTE: garantir que todos os models sejam carregados
@@ -40,6 +41,14 @@ app.add_middleware(
 # =========================
 Base.metadata.create_all(bind=engine)
 run_migration()
+
+# 🔧 AUTO FIX DATABASE (evita erro se coluna não existir)
+with engine.connect() as conn:
+    conn.execute(text("""
+        ALTER TABLE products
+        ADD COLUMN IF NOT EXISTS baseline_conversion_rate FLOAT DEFAULT 0.01
+    """))
+    conn.commit()
 
 # =========================
 # ROUTERS
