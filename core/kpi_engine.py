@@ -9,8 +9,12 @@ def calculate_kpis(logs, product):
     cpc = cost / clicks if clicks > 0 else 0
     cvr_real = conversions / clicks if clicks > 0 else 0
 
-    # 🔥 Modelo oficial Máquina de Guerra (100% CPC-based)
+    # ==========================
+    # MODELO BASE
+    # ==========================
+
     estimated_cvr = product.estimated_conversion_rate or 0
+    baseline_cvr = product.baseline_conversion_rate or 0.01
 
     conversion_base = (
         cvr_real if conversions >= 5
@@ -22,8 +26,27 @@ def calculate_kpis(logs, product):
     margem_real = revenue - cost
 
     # ==========================
+    # PROBABILIDADE DE FALHA
+    # ==========================
+
+    if clicks > 0:
+        probability_no_conversion = (1 - baseline_cvr) ** clicks
+    else:
+        probability_no_conversion = 1
+
+    if probability_no_conversion > 0.5:
+        probability_status = "🟢 Testando"
+    elif probability_no_conversion > 0.2:
+        probability_status = "🟡 Atenção"
+    elif probability_no_conversion > 0.05:
+        probability_status = "🟠 Suspeito"
+    else:
+        probability_status = "🔴 Matar"
+
+    # ==========================
     # STATUS OPERACIONAL
     # ==========================
+
     if cpc > healthy_cpc:
         status = "🔴 CPC Acima do Viável"
     elif cpc > healthy_cpc * 0.8:
@@ -35,20 +58,17 @@ def calculate_kpis(logs, product):
     # SCORE OPERACIONAL (0–100)
     # ==========================
 
-    # 1️⃣ Viabilidade (0–50)
     if gap > 0:
         viability_score = min(gap * 10, 50)
     else:
         viability_score = max(50 + (gap * 20), 0)
 
-    # 2️⃣ Eficiência (0–30)
     if estimated_cvr > 0:
         efficiency_ratio = cvr_real / estimated_cvr
         efficiency_score = min(efficiency_ratio * 30, 30)
     else:
         efficiency_score = 0
 
-    # 3️⃣ Volume (0–20)
     volume_score = min(clicks / 10, 20)
 
     operational_score = round(
@@ -69,6 +89,8 @@ def calculate_kpis(logs, product):
         "healthy_CPC": round(healthy_cpc, 2),
         "gap": round(gap, 2),
         "margem_real": round(margem_real, 2),
+        "probability_no_conversion": round(probability_no_conversion * 100, 2),
+        "probability_status": probability_status,
         "status": status,
         "operational_score": operational_score
     }

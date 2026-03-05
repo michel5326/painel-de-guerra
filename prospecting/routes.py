@@ -56,6 +56,28 @@ def list_prospects(db: Session = Depends(get_db)):
             else 0
         )
 
+        # NEW METRICS
+        break_even_clicks = (
+            p.commission_value / average_bid
+            if average_bid > 0
+            else 0
+        )
+
+        required_cvr = (
+            average_bid / p.commission_value
+            if p.commission_value > 0
+            else 0
+        )
+
+        if required_cvr < 0.02:
+            difficulty_status = "🟢 Muito forte"
+        elif required_cvr < 0.03:
+            difficulty_status = "🟢 Bom"
+        elif required_cvr < 0.04:
+            difficulty_status = "🟡 Médio"
+        else:
+            difficulty_status = "🔴 Difícil"
+
         if viability_ratio > 1:
             viability_status = "🟢 Promissor"
         elif viability_ratio > 0.7:
@@ -74,6 +96,9 @@ def list_prospects(db: Session = Depends(get_db)):
             "top_bid_high": p.top_bid_high,
             "average_bid": round(average_bid, 2),
             "cost_20_clicks": round(cost_20_clicks, 2),
+            "break_even_clicks": round(break_even_clicks, 2),
+            "required_cvr": round(required_cvr * 100, 2),
+            "difficulty_status": difficulty_status,
             "viability_ratio": round(viability_ratio, 2),
             "viability_status": viability_status,
             "temperature_ranking": p.temperature_ranking,

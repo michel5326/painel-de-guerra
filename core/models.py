@@ -14,9 +14,14 @@ class Product(Base):
 
     name = Column(String, nullable=False)
 
-    # 🔥 NOVO MODELO
+    # Comissão média esperada
     commission_value = Column(Float, nullable=False)
-    estimated_conversion_rate = Column(Float, nullable=False)  # ex: 0.02 para 2%
+
+    # CVR estimado usado nos cálculos estratégicos
+    estimated_conversion_rate = Column(Float, nullable=False)  # ex: 0.02 = 2%
+
+    # NOVO: CVR base usado para cálculo de probabilidade estatística
+    baseline_conversion_rate = Column(Float, default=0.01)  # ex: 0.01 = 1%
 
     status = Column(String, default="active")
 
@@ -85,7 +90,7 @@ class DailyLog(Base):
     conversions = Column(Integer, nullable=False)
     revenue = Column(Float, nullable=False)
 
-    # 🔥 FUNIL EXPANDIDO
+    # FUNIL EXPANDIDO
     visitors = Column(Integer, default=0)
     checkouts = Column(Integer, default=0)
     upsells = Column(Integer, default=0)

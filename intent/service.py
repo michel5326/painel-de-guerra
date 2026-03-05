@@ -94,6 +94,25 @@ def build_intent_analysis(
         else:
             status = "🟢 Saudável"
 
+        # ==========================
+        # NEW: Probabilidade de falha de conversão
+        # ==========================
+        baseline_cvr = estimated_cvr if estimated_cvr > 0 else 0.01
+
+        if clicks > 0:
+            probability_no_conversion = (1 - baseline_cvr) ** clicks
+        else:
+            probability_no_conversion = 1
+
+        if probability_no_conversion > 0.5:
+            probability_status = "🟢 Testando"
+        elif probability_no_conversion > 0.2:
+            probability_status = "🟡 Atenção"
+        elif probability_no_conversion > 0.05:
+            probability_status = "🟠 Suspeito"
+        else:
+            probability_status = "🔴 Matar"
+
         result[intent] = {
             "impressions": impressions,
             "clicks": clicks,
@@ -103,6 +122,8 @@ def build_intent_analysis(
             "CVR": round(cvr_real * 100, 2),
             "healthy_CPC": round(healthy_cpc, 2),
             "gap": round(gap, 2),
+            "probability_no_conversion": round(probability_no_conversion * 100, 2),
+            "probability_status": probability_status,
             "status": status
         }
 
