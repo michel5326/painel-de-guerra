@@ -1,33 +1,84 @@
-headline_templates = [
+# =========================
+# HEADLINES EN (US)
+# =========================
 
-"{product} Official Website",
+headlines_en = [
+
 "Buy {product} Today",
-"Order {product} Now",
-"{product} Official Offer",
-"Get {product} Today",
-
 "Only ${price} Per Bottle",
-"Limited Discount Available",
-"Last Hours To Save",
-"Special Offer Today",
+"Save Up To ${discount}",
+"{discount_percent}% Off Today",
+"Official {product} Website",
 
-"Real {product} Customer Reviews",
-"Does {product} Really Work?",
-"{product} Results",
-"{product} Official Store",
+"Free Shipping Available",
+"Fast Delivery Available",
+"Limited Time Discount",
+"Best Offer Just Today",
 
-"Buy {product} From Official Site",
-"Fast Shipping Available"
+"Secure Checkout",
+"Order {product} Now",
+"Official {product} Store",
+"Exclusive Promotion Today",
+
+"Special Deal Today",
+"Last Hours Discount"
 ]
 
 
-description_templates = [
+# =========================
+# HEADLINES PT (BR)
+# =========================
 
-"Buy {product} Today For Only ${price} Per Bottle. Limited Time Offer.",
+headlines_pt = [
 
-"Order {product} From The Official Website With {guarantee} Day Guarantee.",
+"Compre {product} Hoje",
+"Apenas R${price} por Unidade",
+"Economize até R${discount}",
+"{discount_percent}% de Desconto",
+"Site Oficial {product}",
 
-"Get {product} With Fast Shipping And Secure Checkout.",
+"Frete Grátis Disponível",
+"Entrega Rápida",
+"Oferta por Tempo Limitado",
+"Melhor Oferta de Hoje",
 
-"Limited Stock Available. Check The Official Offer Now."
+"Compra Segura",
+"Peça {product} Agora",
+"Loja Oficial {product}",
+"Promoção Exclusiva",
+
+"Oferta Especial Hoje",
+"Últimas Horas de Desconto"
+]
+
+
+# =========================
+# DESCRIPTIONS EN
+# =========================
+
+descriptions_en = [
+
+"Buy {product} Today For Only ${price}. Limited Time Offer.",
+
+"Save Up To ${discount}. Order From Official Website.",
+
+"Free Shipping Available. Secure Checkout Guaranteed.",
+
+"Limited Stock Available. Get The Official Offer Now."
+]
+
+
+# =========================
+# DESCRIPTIONS PT
+# =========================
+
+descriptions_pt = [
+
+"Compre {product} Hoje por Apenas R${price}. Oferta Limitada.",
+
+"Economize até R${discount}. Peça no Site Oficial.",
+
+"Frete Grátis Disponível. Compra 100% Segura.",
+
+"Estoque Limitado. Aproveite a Oferta Agora."
 ]

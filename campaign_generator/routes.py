@@ -13,7 +13,9 @@ def generate_campaign(data: CampaignGenerationRequest):
     campaigns = service.generate_campaign_structure(
         product_name=data.product_name,
         price=data.price_per_unit,
-        guarantee_days=data.guarantee_days or 30
+        discount_value=data.discount_value,
+        discount_percent=data.discount_percent,
+        country=data.country
     )
 
     return {

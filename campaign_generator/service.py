@@ -1,38 +1,56 @@
-from .templates import headline_templates, description_templates
+from .templates import headlines_en, headlines_pt, descriptions_en, descriptions_pt
 
 
 class CampaignGeneratorService:
 
-    def generate_headlines(self, product_name: str, price: float):
+    def generate_headlines(self, product_name, price, discount_value, discount_percent, country):
+
+        if country == "BR":
+            templates = headlines_pt
+        else:
+            templates = headlines_en
 
         headlines = []
 
-        for template in headline_templates:
+        price = int(price)
+        discount = int(discount_value) if discount_value else 0
+
+        for template in templates:
 
             headline = template.replace("{product}", product_name)
             headline = headline.replace("{price}", str(price))
+            headline = headline.replace("{discount}", str(discount))
+            headline = headline.replace("{discount_percent}", str(discount_percent))
 
             headlines.append(headline)
 
         return headlines[:15]
 
 
-    def generate_descriptions(self, product_name: str, price: float, guarantee_days: int):
+    def generate_descriptions(self, product_name, price, discount_value, country):
+
+        if country == "BR":
+            templates = descriptions_pt
+        else:
+            templates = descriptions_en
 
         descriptions = []
 
-        for template in description_templates:
+        price = int(price)
+        discount = int(discount_value) if discount_value else 0
+
+        for template in templates:
 
             description = template.replace("{product}", product_name)
             description = description.replace("{price}", str(price))
-            description = description.replace("{guarantee}", str(guarantee_days))
+            description = description.replace("{discount}", str(discount))
 
             descriptions.append(description)
 
         return descriptions[:4]
 
 
-    def generate_keywords(self, product_name: str):
+    def generate_keywords(self, product_name):
 
         product = product_name.lower()
 
@@ -67,11 +85,22 @@ class CampaignGeneratorService:
         }
 
 
-    def generate_campaign_structure(self, product_name, price, guarantee_days):
+    def generate_campaign_structure(self, product_name, price, discount_value, discount_percent, country):
 
-        headlines = self.generate_headlines(product_name, price)
+        headlines = self.generate_headlines(
+            product_name,
+            price,
+            discount_value,
+            discount_percent,
+            country
+        )
 
-        descriptions = self.generate_descriptions(product_name, price, guarantee_days)
+        descriptions = self.generate_descriptions(
+            product_name,
+            price,
+            discount_value,
+            country
+        )
 
         keywords = self.generate_keywords(product_name)
 
