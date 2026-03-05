@@ -66,6 +66,9 @@ def build_intent_analysis(
     estimated_cvr = product.estimated_conversion_rate or 0
     commission = product.commission_value or 0
 
+    # 🔥 orçamento máximo de teste
+    test_budget_limit = commission * 3
+
     for intent, data in intent_data.items():
 
         impressions = data["impressions"]
@@ -95,8 +98,9 @@ def build_intent_analysis(
             status = "🟢 Saudável"
 
         # ==========================
-        # NEW: Probabilidade de falha de conversão
+        # Probabilidade estatística
         # ==========================
+
         baseline_cvr = estimated_cvr if estimated_cvr > 0 else 0.01
 
         if clicks > 0:
@@ -113,6 +117,24 @@ def build_intent_analysis(
         else:
             probability_status = "🔴 Matar"
 
+        # ==========================
+        # NEW: Consumo do orçamento
+        # ==========================
+
+        if test_budget_limit > 0:
+            budget_share = cost / test_budget_limit
+        else:
+            budget_share = 0
+
+        if budget_share < 0.2:
+            budget_status = "🟢 Baixo impacto"
+        elif budget_share < 0.5:
+            budget_status = "🟡 Relevante"
+        elif budget_share < 0.8:
+            budget_status = "🟠 Alto impacto"
+        else:
+            budget_status = "🔴 Estourando orçamento"
+
         result[intent] = {
             "impressions": impressions,
             "clicks": clicks,
@@ -124,6 +146,8 @@ def build_intent_analysis(
             "gap": round(gap, 2),
             "probability_no_conversion": round(probability_no_conversion * 100, 2),
             "probability_status": probability_status,
+            "budget_share": round(budget_share * 100, 1),
+            "budget_status": budget_status,
             "status": status
         }
 
