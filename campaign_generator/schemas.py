@@ -9,6 +9,8 @@ class CampaignGenerationRequest(BaseModel):
     discount_value: float | None = None
     discount_percent: float | None = None
     guarantee_days: int | None = None
+    installments_text: str | None = None
+    currency: str | None = None
     country: str = "US"
 
 
