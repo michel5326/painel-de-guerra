@@ -33,7 +33,7 @@ class LearningEngine:
             "impressions_global": impressions,
             "clicks_global": clicks,
             "conversions_global": conversions,
-            "cost_global": cost,
+            "cost_global": round(cost, 2),
 
             "ctr_global": round(ctr, 4),
             "cvr_global": round(cvr, 4),
@@ -68,7 +68,7 @@ class LearningEngine:
             "impressions_30d": impressions,
             "clicks_30d": clicks,
             "conversions_30d": conversions,
-            "cost_30d": cost,
+            "cost_30d": round(cost, 2),
 
             "ctr_30d": round(ctr, 4),
             "cvr_30d": round(cvr, 4),
@@ -80,6 +80,8 @@ class LearningEngine:
     # =========================
 
     def healthy_cpc(self, commission: float, cvr: float):
+
         if not commission or not cvr:
             return 0
+
         return round(commission * cvr, 2)

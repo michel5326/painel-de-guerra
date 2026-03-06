@@ -3,18 +3,18 @@ from sqlalchemy.orm import relationship
 from db import Base
 
 
-# ======================
-# OPERACIONAL
-# ======================
+# =========================================================
+# PRODUCT
+# =========================================================
 
 class Product(Base):
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True)
 
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, index=True)
 
-    # Comissão média esperada
+    # comissão média por venda
     commission_value = Column(Float, nullable=False)
 
     # CVR estimado usado nos cálculos estratégicos
@@ -33,20 +33,31 @@ class Product(Base):
     )
 
 
+# =========================================================
+# CAMPAIGN
+# =========================================================
+
 class Campaign(Base):
     __tablename__ = "campaigns"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
+
+    name = Column(String, nullable=False, index=True)
+
     daily_budget = Column(Float, nullable=False)
+
     status = Column(String, default="active")
 
     product_id = Column(
         Integer,
-        ForeignKey("products.id", ondelete="CASCADE")
+        ForeignKey("products.id", ondelete="CASCADE"),
+        index=True
     )
 
-    product = relationship("Product", back_populates="campaigns")
+    product = relationship(
+        "Product",
+        back_populates="campaigns"
+    )
 
     keywords = relationship(
         "Keyword",
@@ -55,21 +66,34 @@ class Campaign(Base):
     )
 
 
+# =========================================================
+# KEYWORD
+# =========================================================
+
 class Keyword(Base):
     __tablename__ = "keywords"
 
     id = Column(Integer, primary_key=True, index=True)
-    keyword = Column(String, nullable=False)
+
+    keyword = Column(String, nullable=False, index=True)
+
     match_type = Column(String, nullable=False)
-    intent = Column(String, nullable=False)
+
+    # informational / commercial / transactional / brand
+    intent = Column(String, nullable=False, index=True)
+
     status = Column(String, default="active")
 
     campaign_id = Column(
         Integer,
-        ForeignKey("campaigns.id", ondelete="CASCADE")
+        ForeignKey("campaigns.id", ondelete="CASCADE"),
+        index=True
     )
 
-    campaign = relationship("Campaign", back_populates="keywords")
+    campaign = relationship(
+        "Campaign",
+        back_populates="keywords"
+    )
 
     logs = relationship(
         "DailyLog",
@@ -78,11 +102,16 @@ class Keyword(Base):
     )
 
 
+# =========================================================
+# DAILY LOG
+# =========================================================
+
 class DailyLog(Base):
     __tablename__ = "daily_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    date = Column(Date, nullable=False)
+
+    date = Column(Date, nullable=False, index=True)
 
     impressions = Column(Integer, nullable=False)
     clicks = Column(Integer, nullable=False)
@@ -91,15 +120,23 @@ class DailyLog(Base):
     conversions = Column(Integer, nullable=False)
     revenue = Column(Float, nullable=False)
 
+    # =========================
     # FUNIL EXPANDIDO
+    # =========================
+
     visitors = Column(Integer, default=0)
     checkouts = Column(Integer, default=0)
     upsells = Column(Integer, default=0)
+
     bounce_rate = Column(Float, nullable=True)
 
     keyword_id = Column(
         Integer,
-        ForeignKey("keywords.id", ondelete="CASCADE")
+        ForeignKey("keywords.id", ondelete="CASCADE"),
+        index=True
     )
 
-    keyword = relationship("Keyword", back_populates="logs")
+    keyword = relationship(
+        "Keyword",
+        back_populates="logs"
+    )

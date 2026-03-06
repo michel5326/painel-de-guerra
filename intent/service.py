@@ -20,7 +20,7 @@ def build_intent_analysis(
     intent_data = {}
 
     # ==========================
-    # Coleta dados por intenção
+    # COLETA DE DADOS POR INTENT
     # ==========================
     for campaign in product.campaigns or []:
         for keyword in campaign.keywords or []:
@@ -40,7 +40,7 @@ def build_intent_analysis(
             if not logs:
                 continue
 
-            intent = keyword.intent
+            intent = keyword.intent or "unknown"
 
             if intent not in intent_data:
                 intent_data[intent] = {
@@ -52,21 +52,21 @@ def build_intent_analysis(
                 }
 
             for log in logs:
-                intent_data[intent]["impressions"] += log.impressions
-                intent_data[intent]["clicks"] += log.clicks
-                intent_data[intent]["cost"] += log.cost
-                intent_data[intent]["conversions"] += log.conversions
-                intent_data[intent]["revenue"] += log.revenue
+                intent_data[intent]["impressions"] += log.impressions or 0
+                intent_data[intent]["clicks"] += log.clicks or 0
+                intent_data[intent]["cost"] += log.cost or 0
+                intent_data[intent]["conversions"] += log.conversions or 0
+                intent_data[intent]["revenue"] += log.revenue or 0
 
     # ==========================
-    # Cálculo estrutural por intenção
+    # CÁLCULO POR INTENT
     # ==========================
     result = {}
 
     estimated_cvr = product.estimated_conversion_rate or 0
     commission = product.commission_value or 0
 
-    # 🔥 orçamento máximo de teste
+    # orçamento máximo de teste
     test_budget_limit = commission * 3
 
     for intent, data in intent_data.items():
@@ -80,17 +80,20 @@ def build_intent_analysis(
         cpc = cost / clicks if clicks > 0 else 0
         cvr_real = conversions / clicks if clicks > 0 else 0
 
-        # 🔒 Regra de proteção estatística
-        conversion_base = (
-            cvr_real if conversions >= 5
-            else estimated_cvr
-        )
+        # ==========================
+        # MODELO DE CONVERSÃO
+        # ==========================
+        conversion_base = cvr_real if conversions >= 5 else estimated_cvr
 
         healthy_cpc = commission * conversion_base
         gap = healthy_cpc - cpc
 
-        # Status estrutural
-        if gap < 0:
+        # ==========================
+        # STATUS ECONÔMICO
+        # ==========================
+        if healthy_cpc == 0:
+            status = "⚪ Sem dados"
+        elif gap < 0:
             status = "🔴 Inviável"
         elif gap < healthy_cpc * 0.2:
             status = "🟡 Atenção"
@@ -98,9 +101,8 @@ def build_intent_analysis(
             status = "🟢 Saudável"
 
         # ==========================
-        # Probabilidade estatística
+        # PROBABILIDADE DE NÃO CONVERSÃO
         # ==========================
-
         baseline_cvr = estimated_cvr if estimated_cvr > 0 else 0.01
 
         if clicks > 0:
@@ -118,9 +120,8 @@ def build_intent_analysis(
             probability_status = "🔴 Matar"
 
         # ==========================
-        # NEW: Consumo do orçamento
+        # CONSUMO DO ORÇAMENTO DE TESTE
         # ==========================
-
         if test_budget_limit > 0:
             budget_share = cost / test_budget_limit
         else:
@@ -135,19 +136,27 @@ def build_intent_analysis(
         else:
             budget_status = "🔴 Estourando orçamento"
 
+        # ==========================
+        # RESULTADO FINAL
+        # ==========================
         result[intent] = {
             "impressions": impressions,
             "clicks": clicks,
             "conversions": conversions,
+
             "CTR": round(ctr * 100, 2),
             "CPC": round(cpc, 2),
             "CVR": round(cvr_real * 100, 2),
+
             "healthy_CPC": round(healthy_cpc, 2),
             "gap": round(gap, 2),
+
             "probability_no_conversion": round(probability_no_conversion * 100, 2),
             "probability_status": probability_status,
+
             "budget_share": round(budget_share * 100, 1),
             "budget_status": budget_status,
+
             "status": status
         }
 

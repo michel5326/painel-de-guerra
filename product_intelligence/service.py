@@ -19,6 +19,9 @@ def build_strategic_dashboard(product_id: int, db: Session):
 
     keywords_data = []
 
+    # ==========================
+    # COLETA DE DADOS
+    # ==========================
     for campaign in product.campaigns or []:
         for keyword in campaign.keywords or []:
 
@@ -29,11 +32,11 @@ def build_strategic_dashboard(product_id: int, db: Session):
             if not logs:
                 continue
 
-            impressions = sum(log.impressions for log in logs)
-            clicks = sum(log.clicks for log in logs)
-            cost = sum(log.cost for log in logs)
-            conversions = sum(log.conversions for log in logs)
-            revenue = sum(log.revenue for log in logs)
+            impressions = sum((log.impressions or 0) for log in logs)
+            clicks = sum((log.clicks or 0) for log in logs)
+            cost = sum((log.cost or 0) for log in logs)
+            conversions = sum((log.conversions or 0) for log in logs)
+            revenue = sum((log.revenue or 0) for log in logs)
 
             total_impressions += impressions
             total_clicks += clicks
@@ -47,48 +50,59 @@ def build_strategic_dashboard(product_id: int, db: Session):
                 "conversions": conversions
             })
 
+    # ==========================
+    # SEM DADOS
+    # ==========================
     if total_clicks == 0:
         return {
             "product": product.name,
             "status": "NO_DATA"
         }
 
-    # ===== Estrutura Macro =====
+    # ==========================
+    # ESTRUTURA MACRO
+    # ==========================
 
     cpc_medio = total_cost / total_clicks
     cvr_real = total_conversions / total_clicks if total_clicks > 0 else 0
 
     estimated_cvr = product.estimated_conversion_rate or 0
+    commission = product.commission_value or 0
 
+    # proteção estatística
     conversion_base = (
         cvr_real if total_conversions >= 5
         else estimated_cvr
     )
 
-    healthy_cpc = product.commission_value * conversion_base
+    healthy_cpc = commission * conversion_base
     gap_estrutural = healthy_cpc - cpc_medio
 
     margem_real_total = total_revenue - total_cost
 
-    # ===== Distribuição de Risco =====
+    # ==========================
+    # DISTRIBUIÇÃO DE RISCO
+    # ==========================
 
     custo_em_risco = 0
 
     for k in keywords_data:
-        if k["clicks"] > 0:
 
-            cpc_k = k["cost"] / k["clicks"]
-            cvr_k = k["conversions"] / k["clicks"] if k["clicks"] > 0 else 0
+        if k["clicks"] <= 0:
+            continue
 
-            base_k = (
-                cvr_k if k["conversions"] >= 5
-                else estimated_cvr
-            )
+        cpc_k = k["cost"] / k["clicks"]
+        cvr_k = k["conversions"] / k["clicks"] if k["clicks"] > 0 else 0
 
-            healthy_k = product.commission_value * base_k
+        base_k = (
+            cvr_k if k["conversions"] >= 5
+            else estimated_cvr
+        )
 
-            if cpc_k > healthy_k:
-                custo_em_risco += k["cost"]
+        healthy_k = commission * base_k
+
+        if healthy_k > 0 and cpc_k > healthy_k:
+            custo_em_risco += k["cost"]
 
     percentual_custo_em_risco = (
         (custo_em_risco / total_cost) * 100
@@ -96,23 +110,25 @@ def build_strategic_dashboard(product_id: int, db: Session):
         else 0
     )
 
-    # ===== Status Estrutural =====
+    # ==========================
+    # STATUS ESTRUTURAL
+    # ==========================
 
-    if gap_estrutural < 0:
+    if healthy_cpc == 0:
+        status = "⚪ Dados insuficientes"
+    elif gap_estrutural < 0:
         status = "🔴 Estruturalmente Inviável"
     elif gap_estrutural < healthy_cpc * 0.2:
         status = "🟡 Estrutura Frágil"
     else:
         status = "🟢 Estruturalmente Saudável"
 
-    # ==================================
+    # ==========================
     # TEST BUDGET CONTROL
-    # ==================================
+    # ==========================
 
-    commission = product.commission_value or 0
     test_budget_limit = commission * 3
 
-    # progresso do teste
     test_progress = (
         (total_cost / test_budget_limit) * 100
         if test_budget_limit > 0
@@ -120,28 +136,43 @@ def build_strategic_dashboard(product_id: int, db: Session):
     )
 
     if total_cost >= test_budget_limit and total_conversions == 0:
+
         test_budget_status = "🔴 Kill Product (Budget Exceeded)"
         recommendation = "STOP TEST"
+
     elif total_cost >= commission * 2 and total_conversions == 0:
+
         test_budget_status = "🟠 High Risk"
         recommendation = "Monitor Closely"
+
     else:
+
         test_budget_status = "🟢 Within Test Budget"
         recommendation = "Continue Testing"
 
+    # ==========================
+    # RESULTADO FINAL
+    # ==========================
+
     return {
+
         "product": product.name,
+
         "cpc_medio": round(cpc_medio, 2),
         "healthy_cpc_medio": round(healthy_cpc, 2),
         "gap_estrutural": round(gap_estrutural, 2),
+
         "status_estrutural": status,
+
         "receita_total": round(total_revenue, 2),
         "custo_total": round(total_cost, 2),
         "margem_real_total": round(margem_real_total, 2),
+
         "conversoes_totais": total_conversions,
+
         "percentual_custo_em_risco": round(percentual_custo_em_risco, 1),
 
-        # TEST MONITOR
+        # TEST CONTROL
         "test_budget_limit": round(test_budget_limit, 2),
         "test_budget_status": test_budget_status,
         "test_progress": round(test_progress, 1),

@@ -24,6 +24,7 @@ class CampaignStructure(BaseModel):
     ad_group: str
     keywords: List[str]
     ads: AdAsset
+    callouts: List[str]
 
 
 class CampaignGenerationResponse(BaseModel):
