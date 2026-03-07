@@ -1,57 +1,63 @@
 HEADLINES_PT = {
 
 "brand": [
+
 "Site Oficial {product}",
 "{product} Site Oficial",
-"{product} Oficial",
-"Loja Oficial {product}",
-"Página Oficial {product}",
 "Compre {product} Oficial",
 "{product} Produto Original",
 "{product} Compra Segura",
+"Página Oficial {product}",
 "{product} Site Seguro",
-"Oferta Oficial {product}",
-"{product} Garantia Oficial",
-"{product} Frete Grátis",
-"{product} Entrega Rápida",
-"{product} Original",
-"{product} Promoção Oficial"
+"{product} Oficial Com Garantia",
+"{product} Original Com Garantia",
+"{product} Loja Oficial",
+"Compre {product} no Site Oficial",
+"{product} Original e Garantido",
+"{product} Original no Site Oficial",
+"{product} Oficial com Frete Grátis",
+"{product} Garantia Oficial"
+
 ],
 
 "commercial": [
+
 "{product} Vale a Pena?",
 "{product} Funciona Mesmo?",
-"Veja Sobre {product}",
+"{product} Antes e Depois",
+"Avaliações de {product}",
+"Resultados de {product}",
+"{product} Reclamações",
+"Review de {product}",
+"{product} É Confiável?",
 "Conheça {product}",
 "Saiba Mais Sobre {product}",
-"Resultados de {product}",
-"Veja Avaliações {product}",
-"Avaliações de {product}",
-"Opiniões Sobre {product}",
-"{product} Reclamações",
-"{product} É Confiável?",
-"{product} Antes e Depois",
+"Informações Sobre {product}",
+"Veja Avaliações de {product}",
 "{product} Funciona?",
-"Informações {product}",
-"Review de {product}"
+"Opiniões Sobre {product}",
+"Veja Resultados de {product}"
+
 ],
 
 "transactional": [
+
 "Compre {product} Hoje",
-"Peça {product} Agora",
-"{product} por R${price}",
-"Apenas R${price} Hoje",
-"{discount_percent}% de Desconto",
-"Economize R${discount}",
-"Oferta Especial Hoje",
-"Promoção Especial",
-"Melhor Oferta Hoje",
-"Frete Grátis Hoje",
-"Entrega Rápida",
-"Última Chance Hoje",
-"Oferta por Tempo Limitado",
-"Estoque Limitado",
+"{product} Promoção Especial",
+"{product} Com {discount_percent}% Desconto",
+"{product} Apenas R${price}",
+"{product} Melhor Oferta Hoje",
+"Oferta Especial {product}",
+"Compre {product} Com Desconto",
+"{product} Promoção Especial Hoje",
+"{product} Com Frete Grátis",
+"{product} Entrega Rápida",
+"{product} Oferta Por Tempo Limitado",
+"Garanta {product} Hoje",
+"{product} Desconto Especial",
+"{product} Melhor Preço Hoje",
 "Compre {product} Agora"
+
 ]
 
 }
@@ -60,57 +66,63 @@ HEADLINES_PT = {
 HEADLINES_EN = {
 
 "brand": [
+
 "{product} Official Website",
-"{product} Official Site",
-"Official {product} Store",
-"{product} Official",
+"Official {product} Site",
+"Buy {product} Official",
 "{product} Original Product",
 "{product} Secure Checkout",
-"{product} Official Page",
-"{product} Secure Site",
-"Buy {product} Official",
-"{product} Official Offer",
-"{product} Free Shipping",
-"{product} Fast Delivery",
-"{product} Official Deal",
-"{product} Trusted Product",
-"{product} Official Promo"
+"Official {product} Page",
+"{product} Secure Website",
+"{product} Official With Guarantee",
+"{product} Original With Guarantee",
+"{product} Official Store",
+"Buy {product} From Official Site",
+"{product} Authentic Product",
+"{product} Original From Official Site",
+"{product} Official Free Shipping",
+"{product} Official Guarantee"
+
 ],
 
 "commercial": [
+
 "Is {product} Worth It?",
-"Does {product} Work?",
-"{product} Reviews",
-"Real {product} Reviews",
-"Learn About {product}",
-"{product} Results",
+"Does {product} Really Work?",
+"{product} Before and After",
 "{product} Customer Reviews",
+"{product} Results",
+"{product} Complaints",
+"{product} Review",
+"Is {product} Legit?",
+"Learn About {product}",
+"More Info About {product}",
 "{product} Information",
 "See {product} Reviews",
-"{product} Complaints",
-"{product} Before And After",
-"{product} Honest Review",
-"About {product}",
-"{product} Pros And Cons",
-"{product} Explained"
+"{product} Does It Work?",
+"{product} User Opinions",
+"See {product} Results"
+
 ],
 
 "transactional": [
+
 "Buy {product} Today",
-"Order {product} Now",
-"Only ${price} Today",
+"{product} Special Promotion",
+"{product} {discount_percent}% Discount",
 "{product} Only ${price}",
-"{discount_percent}% Discount",
-"Save ${discount}",
-"Special Offer Today",
-"Best Price Today",
-"Free Shipping Today",
-"Fast Delivery",
-"Limited Time Offer",
-"Last Chance Today",
-"Limited Stock",
-"Buy {product} Now",
-"Special Discount Today"
+"{product} Best Price Today",
+"Special Offer {product}",
+"Buy {product} With Discount",
+"{product} Special Sale Today",
+"{product} Free Shipping",
+"{product} Fast Delivery",
+"{product} Limited Time Offer",
+"Get {product} Today",
+"{product} Special Discount",
+"{product} Best Deal Today",
+"Order {product} Now"
+
 ]
 
 }
