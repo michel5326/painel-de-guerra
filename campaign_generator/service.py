@@ -40,7 +40,6 @@ class CampaignGeneratorService:
 
         callouts = generate_callouts(country)
 
-        # agora keywords respeitam o país
         keywords = generate_keywords(product_name, country)
 
         extra_transactional_headlines = []
@@ -68,10 +67,16 @@ class CampaignGeneratorService:
                 installments_text.replace(" ", "")
             )
 
-        transactional_headlines = headlines["transactional"][:]
+        transactional_headlines = []
 
+        # primeiro entram dados do produto
         for item in extra_transactional_headlines:
-            if item and item not in transactional_headlines:
+            if item:
+                transactional_headlines.append(item)
+
+        # depois entram headlines padrão
+        for item in headlines["transactional"]:
+            if item not in transactional_headlines:
                 transactional_headlines.append(item)
 
         transactional_headlines = transactional_headlines[:15]
