@@ -31,10 +31,13 @@ class CampaignGeneratorService:
             country
         )
 
+        # ✅ chamada corrigida
         descriptions = generate_descriptions(
             product_name,
             price,
-            discount_value,
+            discount_percent,
+            guarantee_days,
+            free_shipping,
             country
         )
 

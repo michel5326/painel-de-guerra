@@ -1,5 +1,3 @@
-import random
-
 MAX_DESCRIPTION = 90
 
 
@@ -13,42 +11,48 @@ def safe_text(text, limit):
 
 
 DESCRIPTIONS_PT = [
-    "Compre {product} no site oficial por apenas R${price}. Oferta por tempo limitado.",
-    "Economize R${discount} hoje. Pedido seguro de {product} com garantia.",
-    "Frete grátis disponível. Receba {product} com entrega rápida.",
-    "Oferta oficial de {product} com desconto especial hoje.",
-    "Peça {product} agora com frete grátis e compra segura.",
-    "Garanta {product} hoje com promoção e estoque limitado.",
-    "Compre {product} com desconto especial e entrega rápida.",
-    "Pedido oficial de {product} com garantia e envio imediato."
+
+"Compre {product} com {shipping}. {guarantee_days} dias de garantia.",
+"Garanta {product} hoje com {discount_percent}% de desconto. {shipping}.",
+"Oferta oficial de {product}. Apenas R${price} por unidade. {shipping}.",
+"Compre {product} agora com desconto exclusivo e entrega rápida."
+
 ]
 
 
 DESCRIPTIONS_EN = [
-    "Buy {product} from the official website for only ${price}. Limited time offer.",
-    "Save ${discount} today. Order {product} with secure checkout.",
-    "Free shipping available. Get {product} with fast delivery.",
-    "Official {product} offer with special discount today.",
-    "Order {product} now with free shipping and secure checkout.",
-    "Get {product} today with promotional price and limited stock.",
-    "Buy {product} with discount and fast delivery available.",
-    "Official {product} order with guarantee and quick shipping."
+
+"Buy {product} today with {shipping}. {guarantee_days}-day guarantee.",
+"Get {product} now with {discount_percent}% discount. {shipping}.",
+"Official {product} offer. Only ${price} per unit. {shipping}.",
+"Order {product} today with exclusive discount and fast delivery."
+
 ]
 
 
-def generate_descriptions(product_name, price, discount_value, country):
+def generate_descriptions(
+    product_name,
+    price,
+    discount_percent,
+    guarantee_days,
+    free_shipping,
+    country
+):
 
     product_name = product_name.title()
 
     templates = DESCRIPTIONS_PT if country == "BR" else DESCRIPTIONS_EN
 
-    price = int(price) if price else 0
-    discount = int(discount_value) if discount_value else 0
-
-    templates = templates.copy()
-    random.shuffle(templates)
-
     descriptions = []
+
+    price = int(price) if price else 0
+    discount_percent = int(discount_percent) if discount_percent else 0
+    guarantee_days = int(guarantee_days) if guarantee_days else 30
+
+    if free_shipping:
+        shipping = "frete grátis e entrega rápida" if country == "BR" else "free shipping and fast delivery"
+    else:
+        shipping = "entrega rápida" if country == "BR" else "fast delivery"
 
     for template in templates:
 
@@ -56,11 +60,13 @@ def generate_descriptions(product_name, price, discount_value, country):
 
         description = description.replace("{product}", product_name)
         description = description.replace("{price}", str(price))
-        description = description.replace("{discount}", str(discount))
+        description = description.replace("{discount_percent}", str(discount_percent))
+        description = description.replace("{guarantee_days}", str(guarantee_days))
+        description = description.replace("{shipping}", shipping)
 
         description = safe_text(description, MAX_DESCRIPTION)
 
-        if description and description not in descriptions:
+        if description not in descriptions:
             descriptions.append(description)
 
     return descriptions[:4]
