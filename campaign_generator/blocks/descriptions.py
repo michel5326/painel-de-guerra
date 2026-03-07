@@ -1,3 +1,5 @@
+import random
+
 MAX_DESCRIPTION = 90
 
 
@@ -11,18 +13,26 @@ def safe_text(text, limit):
 
 
 DESCRIPTIONS_PT = [
-    "Compre {product} hoje por apenas R${price}. Oferta especial disponível.",
-    "Economize R${discount} hoje. Peça {product} com compra segura.",
+    "Compre {product} no site oficial por apenas R${price}. Oferta por tempo limitado.",
+    "Economize R${discount} hoje. Pedido seguro de {product} com garantia.",
     "Frete grátis disponível. Receba {product} com entrega rápida.",
-    "Aproveite a oferta oficial de {product} com estoque limitado."
+    "Oferta oficial de {product} com desconto especial hoje.",
+    "Peça {product} agora com frete grátis e compra segura.",
+    "Garanta {product} hoje com promoção e estoque limitado.",
+    "Compre {product} com desconto especial e entrega rápida.",
+    "Pedido oficial de {product} com garantia e envio imediato."
 ]
 
 
 DESCRIPTIONS_EN = [
-    "Buy {product} today for only ${price}. Limited time offer.",
+    "Buy {product} from the official website for only ${price}. Limited time offer.",
     "Save ${discount} today. Order {product} with secure checkout.",
     "Free shipping available. Get {product} with fast delivery.",
-    "Official {product} offer with limited stock available."
+    "Official {product} offer with special discount today.",
+    "Order {product} now with free shipping and secure checkout.",
+    "Get {product} today with promotional price and limited stock.",
+    "Buy {product} with discount and fast delivery available.",
+    "Official {product} order with guarantee and quick shipping."
 ]
 
 
@@ -32,10 +42,13 @@ def generate_descriptions(product_name, price, discount_value, country):
 
     templates = DESCRIPTIONS_PT if country == "BR" else DESCRIPTIONS_EN
 
-    descriptions = []
-
     price = int(price) if price else 0
     discount = int(discount_value) if discount_value else 0
+
+    templates = templates.copy()
+    random.shuffle(templates)
+
+    descriptions = []
 
     for template in templates:
 
@@ -47,7 +60,7 @@ def generate_descriptions(product_name, price, discount_value, country):
 
         description = safe_text(description, MAX_DESCRIPTION)
 
-        if description not in descriptions:
+        if description and description not in descriptions:
             descriptions.append(description)
 
     return descriptions[:4]

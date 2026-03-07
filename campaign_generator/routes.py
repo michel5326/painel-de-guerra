@@ -15,7 +15,13 @@ def generate_campaign(data: CampaignGenerationRequest):
         price=data.price_per_unit,
         discount_value=data.discount_value,
         discount_percent=data.discount_percent,
-        country=data.country
+        country=data.country,
+        guarantee_days=data.guarantee_days,
+        installments_text=data.installments_text,
+        currency=data.currency,
+        bundle_offer=data.bundle_offer,
+        free_shipping=data.free_shipping,
+        stock_urgency=data.stock_urgency
     )
 
     return {

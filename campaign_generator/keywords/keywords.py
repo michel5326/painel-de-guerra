@@ -6,7 +6,9 @@ def generate_keywords(product_name):
         f"{product}",
         f"{product} official",
         f"{product} official website",
-        f"{product} site"
+        f"{product} official site",
+        f"{product} site",
+        f"{product} original"
     ]
 
     commercial_keywords = [
@@ -14,7 +16,10 @@ def generate_keywords(product_name):
         f"{product} review",
         f"{product} results",
         f"{product} complaints",
-        f"{product} does it work"
+        f"{product} does it work",
+        f"{product} worth it",
+        f"{product} before and after",
+        f"{product} customer reviews"
     ]
 
     transactional_keywords = [
@@ -23,7 +28,10 @@ def generate_keywords(product_name):
         f"{product} price",
         f"{product} discount",
         f"{product} official offer",
-        f"{product} shop"
+        f"{product} shop",
+        f"{product} buy online",
+        f"{product} best price",
+        f"{product} where to buy"
     ]
 
     return {

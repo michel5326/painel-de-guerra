@@ -6,7 +6,20 @@ from .keywords.keywords import generate_keywords
 
 class CampaignGeneratorService:
 
-    def generate_campaign_structure(self, product_name, price, discount_value, discount_percent, country):
+    def generate_campaign_structure(
+        self,
+        product_name,
+        price,
+        discount_value,
+        discount_percent,
+        country,
+        guarantee_days=None,
+        installments_text=None,
+        currency=None,
+        bundle_offer=None,
+        free_shipping=None,
+        stock_urgency=None
+    ):
 
         product_name = product_name.title()
 
@@ -26,11 +39,43 @@ class CampaignGeneratorService:
         )
 
         callouts = generate_callouts(country)
-
         keywords = generate_keywords(product_name)
 
-        campaigns = [
+        currency_symbol = currency or ("R$" if country == "BR" else "$")
 
+        extra_transactional_headlines = []
+
+        if bundle_offer:
+            extra_transactional_headlines.append(bundle_offer)
+
+        if free_shipping:
+            extra_transactional_headlines.append(
+                "Frete Grátis Hoje" if country == "BR" else "Free Shipping Today"
+            )
+
+        if stock_urgency:
+            extra_transactional_headlines.append(stock_urgency)
+
+        if guarantee_days:
+            extra_transactional_headlines.append(
+                f"{guarantee_days} Dias de Garantia"
+                if country == "BR"
+                else f"{guarantee_days} Day Guarantee"
+            )
+
+        if installments_text:
+            extra_transactional_headlines.append(
+                installments_text
+            )
+
+        transactional_headlines = headlines["transactional"][:]
+        for item in extra_transactional_headlines:
+            if item and item not in transactional_headlines:
+                transactional_headlines.append(item)
+
+        transactional_headlines = transactional_headlines[:15]
+
+        campaigns = [
             {
                 "campaign_name": f"Search | {product_name} | Brand",
                 "ad_group": f"{product_name} Brand",
@@ -41,7 +86,6 @@ class CampaignGeneratorService:
                 },
                 "callouts": callouts
             },
-
             {
                 "campaign_name": f"Search | {product_name} | Commercial",
                 "ad_group": f"{product_name} Reviews",
@@ -52,18 +96,16 @@ class CampaignGeneratorService:
                 },
                 "callouts": callouts
             },
-
             {
                 "campaign_name": f"Search | {product_name} | Transactional",
                 "ad_group": f"Buy {product_name}",
                 "keywords": keywords["transactional"],
                 "ads": {
-                    "headlines": headlines["transactional"],
+                    "headlines": transactional_headlines,
                     "descriptions": descriptions
                 },
                 "callouts": callouts
             }
-
         ]
 
         return campaigns

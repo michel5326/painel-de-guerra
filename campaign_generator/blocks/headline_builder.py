@@ -1,3 +1,5 @@
+import random
+
 MAX_HEADLINE = 30
 
 
@@ -13,6 +15,11 @@ def safe_text(text, limit):
 
 def build_headlines(templates, product_name, price, discount, discount_percent):
 
+    product_name = product_name.title()
+
+    templates = templates.copy()
+    random.shuffle(templates)
+
     headlines = []
 
     for template in templates:
@@ -26,7 +33,7 @@ def build_headlines(templates, product_name, price, discount, discount_percent):
 
         headline = safe_text(headline, MAX_HEADLINE)
 
-        if headline not in headlines:
+        if headline and headline not in headlines:
             headlines.append(headline)
 
-    return headlines
+    return headlines[:15]

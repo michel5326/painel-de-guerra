@@ -1,3 +1,5 @@
+import random
+
 MAX_CALLOUT = 25
 
 
@@ -12,7 +14,7 @@ def safe_text(text, limit):
 
 CALLOUTS_PT = [
     "Frete Grátis",
-    "Compra Segura",
+    "Compra 100% Segura",
     "Produto Original",
     "Entrega Rápida",
     "90 Dias de Garantia",
@@ -20,13 +22,15 @@ CALLOUTS_PT = [
     "Desconto Exclusivo",
     "Oferta por Tempo Limitado",
     "Site Oficial",
-    "Garantia de Satisfação"
+    "Garantia de Satisfação",
+    "Envio Imediato",
+    "Estoque Limitado"
 ]
 
 
 CALLOUTS_EN = [
     "Free Shipping",
-    "Secure Checkout",
+    "100% Secure Checkout",
     "Original Product",
     "Fast Delivery",
     "90 Day Guarantee",
@@ -34,7 +38,9 @@ CALLOUTS_EN = [
     "Exclusive Discount",
     "Limited Time Offer",
     "Official Website",
-    "Satisfaction Guarantee"
+    "Money Back Guarantee",
+    "Immediate Shipping",
+    "Limited Stock"
 ]
 
 
@@ -42,13 +48,16 @@ def generate_callouts(country):
 
     templates = CALLOUTS_PT if country == "BR" else CALLOUTS_EN
 
+    templates = templates.copy()
+    random.shuffle(templates)
+
     callouts = []
 
     for c in templates:
 
         callout = safe_text(c, MAX_CALLOUT)
 
-        if callout not in callouts:
+        if callout and callout not in callouts:
             callouts.append(callout)
 
     return callouts[:10]

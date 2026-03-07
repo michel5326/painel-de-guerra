@@ -8,10 +8,15 @@ class CampaignGenerationRequest(BaseModel):
     price_per_unit: float
     discount_value: float | None = None
     discount_percent: float | None = None
+
     guarantee_days: int | None = None
     installments_text: str | None = None
     currency: str | None = None
     country: str = "US"
+
+    bundle_offer: str | None = None
+    free_shipping: bool | None = None
+    stock_urgency: str | None = None
 
 
 class AdAsset(BaseModel):
