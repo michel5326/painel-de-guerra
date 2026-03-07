@@ -39,22 +39,22 @@ class CampaignGeneratorService:
         )
 
         callouts = generate_callouts(country)
-        keywords = generate_keywords(product_name)
 
-        currency_symbol = currency or ("R$" if country == "BR" else "$")
+        # agora keywords respeitam o país
+        keywords = generate_keywords(product_name, country)
 
         extra_transactional_headlines = []
 
         if bundle_offer:
-            extra_transactional_headlines.append(bundle_offer)
+            extra_transactional_headlines.append(bundle_offer.title())
+
+        if stock_urgency:
+            extra_transactional_headlines.append(stock_urgency.title())
 
         if free_shipping:
             extra_transactional_headlines.append(
                 "Frete Grátis Hoje" if country == "BR" else "Free Shipping Today"
             )
-
-        if stock_urgency:
-            extra_transactional_headlines.append(stock_urgency)
 
         if guarantee_days:
             extra_transactional_headlines.append(
@@ -65,10 +65,11 @@ class CampaignGeneratorService:
 
         if installments_text:
             extra_transactional_headlines.append(
-                installments_text
+                installments_text.replace(" ", "")
             )
 
         transactional_headlines = headlines["transactional"][:]
+
         for item in extra_transactional_headlines:
             if item and item not in transactional_headlines:
                 transactional_headlines.append(item)
