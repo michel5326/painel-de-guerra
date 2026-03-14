@@ -13,6 +13,8 @@ def build_strategic_dashboard(product_id: int, db: Session):
 
     total_impressions = 0
     total_clicks = 0
+    total_visitors = 0
+    total_checkouts = 0
     total_cost = 0
     total_conversions = 0
     total_revenue = 0
@@ -34,12 +36,16 @@ def build_strategic_dashboard(product_id: int, db: Session):
 
             impressions = sum((log.impressions or 0) for log in logs)
             clicks = sum((log.clicks or 0) for log in logs)
+            visitors = sum((log.visitors or 0) for log in logs)
+            checkouts = sum((log.checkouts or 0) for log in logs)
             cost = sum((log.cost or 0) for log in logs)
             conversions = sum((log.conversions or 0) for log in logs)
             revenue = sum((log.revenue or 0) for log in logs)
 
             total_impressions += impressions
             total_clicks += clicks
+            total_visitors += visitors
+            total_checkouts += checkouts
             total_cost += cost
             total_conversions += conversions
             total_revenue += revenue
@@ -47,6 +53,8 @@ def build_strategic_dashboard(product_id: int, db: Session):
             keywords_data.append({
                 "cost": cost,
                 "clicks": clicks,
+                "visitors": visitors,
+                "checkouts": checkouts,
                 "conversions": conversions
             })
 
@@ -60,20 +68,20 @@ def build_strategic_dashboard(product_id: int, db: Session):
         }
 
     # ==========================
-    # ESTRUTURA MACRO
+    # FUNIL
     # ==========================
+    visit_rate = total_visitors / total_clicks if total_clicks > 0 else 0
+    checkout_rate = total_checkouts / total_visitors if total_visitors > 0 else 0
+    close_rate = total_conversions / total_checkouts if total_checkouts > 0 else 0
 
-    cpc_medio = total_cost / total_clicks
-    cvr_real = total_conversions / total_clicks if total_clicks > 0 else 0
+    cvr_real = visit_rate * checkout_rate * close_rate
+
+    cpc_medio = total_cost / total_clicks if total_clicks > 0 else 0
 
     estimated_cvr = product.estimated_conversion_rate or 0
     commission = product.commission_value or 0
 
-    # proteção estatística
-    conversion_base = (
-        cvr_real if total_conversions >= 5
-        else estimated_cvr
-    )
+    conversion_base = cvr_real if total_conversions >= 5 else estimated_cvr
 
     healthy_cpc = commission * conversion_base
     gap_estrutural = healthy_cpc - cpc_medio
@@ -81,9 +89,8 @@ def build_strategic_dashboard(product_id: int, db: Session):
     margem_real_total = total_revenue - total_cost
 
     # ==========================
-    # DISTRIBUIÇÃO DE RISCO
+    # RISCO
     # ==========================
-
     custo_em_risco = 0
 
     for k in keywords_data:
@@ -92,12 +99,14 @@ def build_strategic_dashboard(product_id: int, db: Session):
             continue
 
         cpc_k = k["cost"] / k["clicks"]
-        cvr_k = k["conversions"] / k["clicks"] if k["clicks"] > 0 else 0
 
-        base_k = (
-            cvr_k if k["conversions"] >= 5
-            else estimated_cvr
-        )
+        visit_rate_k = k["visitors"] / k["clicks"] if k["clicks"] > 0 else 0
+        checkout_rate_k = k["checkouts"] / k["visitors"] if k["visitors"] > 0 else 0
+        close_rate_k = k["conversions"] / k["checkouts"] if k["checkouts"] > 0 else 0
+
+        cvr_k = visit_rate_k * checkout_rate_k * close_rate_k
+
+        base_k = cvr_k if k["conversions"] >= 5 else estimated_cvr
 
         healthy_k = commission * base_k
 
@@ -113,7 +122,6 @@ def build_strategic_dashboard(product_id: int, db: Session):
     # ==========================
     # STATUS ESTRUTURAL
     # ==========================
-
     if healthy_cpc == 0:
         status = "⚪ Dados insuficientes"
     elif gap_estrutural < 0:
@@ -124,9 +132,8 @@ def build_strategic_dashboard(product_id: int, db: Session):
         status = "🟢 Estruturalmente Saudável"
 
     # ==========================
-    # TEST BUDGET CONTROL
+    # TEST CONTROL
     # ==========================
-
     test_budget_limit = commission * 3
 
     test_progress = (
@@ -135,28 +142,28 @@ def build_strategic_dashboard(product_id: int, db: Session):
         else 0
     )
 
-    if total_cost >= test_budget_limit and total_conversions == 0:
-
-        test_budget_status = "🔴 Kill Product (Budget Exceeded)"
+    if total_cost >= test_budget_limit and total_checkouts == 0:
+        test_budget_status = "🔴 Kill Product (No Checkout)"
         recommendation = "STOP TEST"
 
-    elif total_cost >= commission * 2 and total_conversions == 0:
-
-        test_budget_status = "🟠 High Risk"
-        recommendation = "Monitor Closely"
+    elif total_cost >= test_budget_limit and total_conversions == 0:
+        test_budget_status = "🟠 Checkout Without Sales"
+        recommendation = "Investigate Offer"
 
     else:
-
         test_budget_status = "🟢 Within Test Budget"
         recommendation = "Continue Testing"
 
     # ==========================
     # RESULTADO FINAL
     # ==========================
-
     return {
 
         "product": product.name,
+
+        "visit_rate": round(visit_rate * 100, 2),
+        "checkout_rate": round(checkout_rate * 100, 2),
+        "close_rate": round(close_rate * 100, 2),
 
         "cpc_medio": round(cpc_medio, 2),
         "healthy_cpc_medio": round(healthy_cpc, 2),
@@ -172,7 +179,6 @@ def build_strategic_dashboard(product_id: int, db: Session):
 
         "percentual_custo_em_risco": round(percentual_custo_em_risco, 1),
 
-        # TEST CONTROL
         "test_budget_limit": round(test_budget_limit, 2),
         "test_budget_status": test_budget_status,
         "test_progress": round(test_progress, 1),

@@ -10,13 +10,23 @@ def calculate_kpis(logs, product):
     conversions = sum((log.conversions or 0) for log in logs)
     revenue = sum((log.revenue or 0) for log in logs)
 
+    visitors = sum((log.visitors or 0) for log in logs)
+    checkouts = sum((log.checkouts or 0) for log in logs)
+
     # ==========================
     # MÉTRICAS BÁSICAS
     # ==========================
 
     ctr = clicks / impressions if impressions > 0 else 0
     cpc = cost / clicks if clicks > 0 else 0
-    cvr_real = conversions / clicks if clicks > 0 else 0
+
+    # FUNIL DECOMPONENTE
+    visit_rate = visitors / clicks if clicks > 0 else 0
+    checkout_rate = checkouts / visitors if visitors > 0 else 0
+    close_rate = conversions / checkouts if checkouts > 0 else 0
+
+    # CVR REAL DECOMPONENTE
+    cvr_real = visit_rate * checkout_rate * close_rate
 
     # ==========================
     # MODELO BASE DE CONVERSÃO
@@ -72,20 +82,17 @@ def calculate_kpis(logs, product):
     # SCORE OPERACIONAL (0–100)
     # ==========================
 
-    # Viabilidade econômica
     if gap > 0:
         viability_score = min(gap * 10, 50)
     else:
         viability_score = max(50 + (gap * 20), 0)
 
-    # Eficiência de conversão
     if estimated_cvr > 0:
         efficiency_ratio = cvr_real / estimated_cvr
         efficiency_score = min(efficiency_ratio * 30, 30)
     else:
         efficiency_score = 0
 
-    # Volume de dados
     volume_score = min(clicks / 10, 20)
 
     operational_score = round(
@@ -100,12 +107,20 @@ def calculate_kpis(logs, product):
     return {
         "impressions": impressions,
         "clicks": clicks,
+        "visitors": visitors,
+        "checkouts": checkouts,
+
         "cost": round(cost, 2),
         "conversions": conversions,
         "revenue": round(revenue, 2),
 
         "CTR": round(ctr, 4),
         "CPC": round(cpc, 2),
+
+        "visit_rate": round(visit_rate, 4),
+        "checkout_rate": round(checkout_rate, 4),
+        "close_rate": round(close_rate, 4),
+
         "CVR_real": round(cvr_real, 4),
 
         "conversion_base": round(conversion_base, 4),

@@ -46,6 +46,8 @@ def build_intent_analysis(
                 intent_data[intent] = {
                     "impressions": 0,
                     "clicks": 0,
+                    "visitors": 0,
+                    "checkouts": 0,
                     "cost": 0,
                     "conversions": 0,
                     "revenue": 0
@@ -54,6 +56,8 @@ def build_intent_analysis(
             for log in logs:
                 intent_data[intent]["impressions"] += log.impressions or 0
                 intent_data[intent]["clicks"] += log.clicks or 0
+                intent_data[intent]["visitors"] += log.visitors or 0
+                intent_data[intent]["checkouts"] += log.checkouts or 0
                 intent_data[intent]["cost"] += log.cost or 0
                 intent_data[intent]["conversions"] += log.conversions or 0
                 intent_data[intent]["revenue"] += log.revenue or 0
@@ -66,19 +70,28 @@ def build_intent_analysis(
     estimated_cvr = product.estimated_conversion_rate or 0
     commission = product.commission_value or 0
 
-    # orçamento máximo de teste
     test_budget_limit = commission * 3
 
     for intent, data in intent_data.items():
 
         impressions = data["impressions"]
         clicks = data["clicks"]
+        visitors = data["visitors"]
+        checkouts = data["checkouts"]
         cost = data["cost"]
         conversions = data["conversions"]
 
         ctr = clicks / impressions if impressions > 0 else 0
         cpc = cost / clicks if clicks > 0 else 0
-        cvr_real = conversions / clicks if clicks > 0 else 0
+
+        # ==========================
+        # FUNIL DECOMPONENTE
+        # ==========================
+        visit_rate = visitors / clicks if clicks > 0 else 0
+        checkout_rate = checkouts / visitors if visitors > 0 else 0
+        close_rate = conversions / checkouts if checkouts > 0 else 0
+
+        cvr_real = visit_rate * checkout_rate * close_rate
 
         # ==========================
         # MODELO DE CONVERSÃO
@@ -120,12 +133,9 @@ def build_intent_analysis(
             probability_status = "🔴 Matar"
 
         # ==========================
-        # CONSUMO DO ORÇAMENTO DE TESTE
+        # CONSUMO DO ORÇAMENTO
         # ==========================
-        if test_budget_limit > 0:
-            budget_share = cost / test_budget_limit
-        else:
-            budget_share = 0
+        budget_share = cost / test_budget_limit if test_budget_limit > 0 else 0
 
         if budget_share < 0.2:
             budget_status = "🟢 Baixo impacto"
@@ -142,10 +152,17 @@ def build_intent_analysis(
         result[intent] = {
             "impressions": impressions,
             "clicks": clicks,
+            "visitors": visitors,
+            "checkouts": checkouts,
             "conversions": conversions,
 
             "CTR": round(ctr * 100, 2),
             "CPC": round(cpc, 2),
+
+            "visit_rate": round(visit_rate * 100, 2),
+            "checkout_rate": round(checkout_rate * 100, 2),
+            "close_rate": round(close_rate * 100, 2),
+
             "CVR": round(cvr_real * 100, 2),
 
             "healthy_CPC": round(healthy_cpc, 2),
